@@ -24,6 +24,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               EVChargePress
             </Link>
             <nav className="flex items-center gap-2 sm:gap-4">
+              <Link href="/map" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white">
+                Map
+              </Link>
               <Link href="/stations/new" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white">
                 + Add station
               </Link>
@@ -35,7 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </header>
         <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">{children}</main>
         <footer className="border-t border-zinc-200 py-6 text-center text-xs text-zinc-500 dark:border-zinc-800">
-          EVChargePress MVP · Station data is community-reported
+          EVChargePress MVP · Station data from drivers and © OpenStreetMap contributors (ODbL)
         </footer>
       </body>
     </html>

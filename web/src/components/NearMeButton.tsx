@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { describeGeoError } from "@/lib/geolocation";
 
 export function NearMeButton() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export function NearMeButton() {
   const active = params.has("lat");
 
   function go() {
+    setErr(null);
     if (active) {
       const p = new URLSearchParams(params);
       p.delete("lat");
@@ -18,7 +20,10 @@ export function NearMeButton() {
       router.push(`/?${p}`);
       return;
     }
-    if (!navigator.geolocation) return setErr("Location not supported");
+    if (!window.isSecureContext || !("geolocation" in navigator)) {
+      setErr(describeGeoError());
+      return;
+    }
     setBusy(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -28,27 +33,33 @@ export function NearMeButton() {
         setBusy(false);
         router.push(`/?${p}`);
       },
-      () => {
+      (e) => {
         setBusy(false);
-        setErr("Couldn't get your location");
+        setErr(describeGeoError(e.code));
       },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
     );
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-col items-end gap-2">
       <button
         type="button"
         onClick={go}
+        disabled={busy}
         className={`rounded-lg px-3 py-2 text-sm font-medium ring-1 ring-inset transition ${
           active
             ? "bg-emerald-600 text-white ring-emerald-600"
             : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-200 dark:ring-zinc-700"
         }`}
       >
-        {busy ? "Locating…" : active ? "Sorted by distance ✕" : "Near me"}
+        {busy ? "Locating…" : active ? "Nearest first ✕" : "Near me"}
       </button>
-      {err && <span className="text-xs text-rose-600">{err}</span>}
+      {err && (
+        <p role="alert" className="max-w-sm rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:bg-amber-500/10 dark:text-amber-200">
+          {err}
+        </p>
+      )}
     </div>
   );
 }

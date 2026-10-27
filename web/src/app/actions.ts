@@ -151,3 +151,36 @@ export async function addCheckin(formData: FormData) {
   revalidatePath("/");
   redirect(`/stations/${stationId}`);
 }
+
+/* ---------- Password recovery ---------- */
+
+export async function requestPasswordReset(formData: FormData) {
+  const email = str(formData.get("email"));
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    redirect(`/forgot-password?error=${enc("Enter a valid email address.")}`);
+  }
+  const origin = (await headers()).get("origin") ?? "";
+  const supabase = await createClient();
+  // The link in the email signs the user in for a short time and lands on /reset-password.
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/confirm?next=${enc("/reset-password")}`,
+  });
+  // Same message whether or not the account exists, so emails can't be probed.
+  redirect(`/forgot-password?sent=1`);
+}
+
+export async function updatePassword(formData: FormData) {
+  const password = str(formData.get("password"));
+  const confirm = str(formData.get("confirm"));
+  if (password.length < 8) redirect(`/reset-password?error=${enc("Use at least 8 characters.")}`);
+  if (password !== confirm) redirect(`/reset-password?error=${enc("The two passwords don't match.")}`);
+
+  const user = await getCurrentUser();
+  if (!user) redirect(`/forgot-password?error=${enc("Your reset link has expired. Request a new one.")}`);
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) redirect(`/reset-password?error=${enc(error.message)}`);
+  revalidatePath("/", "layout");
+  redirect(`/?message=${enc("Password updated.")}`);
+}

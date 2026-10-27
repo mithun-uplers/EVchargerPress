@@ -35,8 +35,15 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         </label>
         <label className="block text-sm font-medium">
           Password
-          <input name="password" type="password" required minLength={6} autoComplete={signup ? "new-password" : "current-password"} className={input} />
+          <input name="password" type="password" required minLength={8} autoComplete={signup ? "new-password" : "current-password"} className={input} />
         </label>
+        {!signup && (
+          <p className="-mt-2 text-right text-sm">
+            <Link href="/forgot-password" className="font-medium text-emerald-700 hover:underline dark:text-emerald-400">
+              Forgot password?
+            </Link>
+          </p>
+        )}
         <button className="w-full rounded-lg bg-emerald-600 py-2.5 text-sm font-medium text-white hover:bg-emerald-700">
           {signup ? "Create account" : "Sign in"}
         </button>

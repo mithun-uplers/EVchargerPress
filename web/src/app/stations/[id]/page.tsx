@@ -5,7 +5,7 @@ import { addCheckin, deleteStation } from "@/app/actions";
 import { StatusBadge } from "@/components/StatusBadge";
 import { timeAgo } from "@/lib/geo";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
-import type { Checkin, Connector, StationSummary } from "@/lib/types";
+import { SOURCE_LABEL, formatPlace, type Checkin, type Connector, type StationSummary } from "@/lib/types";
 
 const UUID = /^[0-9a-f-]{36}$/i;
 
@@ -60,10 +60,23 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
             <h1 className="text-2xl font-semibold tracking-tight">{station.name}</h1>
             <StatusBadge status={station.last_status} />
           </div>
-          <p className="mt-1 text-zinc-500">
-            {station.address}, {station.city}
-          </p>
+          <p className="mt-1 text-zinc-500">{formatPlace(station)}</p>
           {station.is_demo && <p className="mt-1 text-xs text-amber-600">Demo data — not a real station.</p>}
+          {station.data_source === "openstreetmap" && (
+            <p className="mt-1 text-xs text-zinc-500">
+              {SOURCE_LABEL.openstreetmap}
+              {station.external_id && (
+                <>
+                  {" · "}
+                  <a href={`https://www.openstreetmap.org/${station.external_id}`} target="_blank" rel="noreferrer" className="underline">
+                    view or fix on OpenStreetMap
+                  </a>
+                </>
+              )}
+              {station.source_updated_at && <> · data as of {new Date(station.source_updated_at).toLocaleDateString("en-IN")}</>}
+              {station.city_is_approx && <> · town is the nearest one, not a postal address</>}
+            </p>
+          )}
         </div>
         <a href={directions} target="_blank" rel="noreferrer" className="rounded-lg bg-emerald-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-emerald-700">
           Get directions
@@ -76,12 +89,15 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
 
           <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
             <h2 className="font-medium">Connectors</h2>
+            {!(connectors as Connector[] | null)?.length && (
+              <p className="mt-2 text-sm text-zinc-500">The source doesn’t list connector types for this station.</p>
+            )}
             <ul className="mt-3 divide-y divide-zinc-100 dark:divide-zinc-800">
               {(connectors as Connector[] | null)?.map((c) => (
                 <li key={c.id} className="flex items-center justify-between py-2 text-sm">
                   <span className="font-medium">{c.type}</span>
                   <span className="text-zinc-500">
-                    {Number(c.power_kw)} kW · ×{c.quantity}
+                    {c.power_kw ? `${Number(c.power_kw)} kW` : "Power not listed"} · ×{c.quantity}
                   </span>
                 </li>
               ))}
