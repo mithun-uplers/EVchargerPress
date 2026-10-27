@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { addCheckin, deleteStation } from "@/app/actions";
 import { StatusBadge } from "@/components/StatusBadge";
+import { WEEKDAYS } from "@/lib/format";
 import { timeAgo } from "@/lib/geo";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import { SOURCE_LABEL, formatPlace, type Checkin, type Connector, type StationSummary } from "@/lib/types";
@@ -30,7 +31,7 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
   if (!station) notFound();
 
   const supabase = await createClient();
-  const [{ data: connectors }, { data: checkins }, user] = await Promise.all([
+  const [{ data: connectors }, { data: checkins }, user, { data: bookable }, { data: hours }] = await Promise.all([
     supabase.from("connectors").select("*").eq("station_id", id).order("power_kw", { ascending: false }),
     supabase
       .from("checkins")
@@ -39,7 +40,14 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
       .order("created_at", { ascending: false })
       .limit(20),
     getCurrentUser(),
+    supabase.from("evses").select("id").eq("station_id", id).eq("is_bookable", true).eq("is_active", true).limit(1),
+    supabase.from("operating_hours").select("weekday,opens_at,closes_at").eq("station_id", id).order("weekday").order("opens_at"),
   ]);
+  const canBook = (bookable ?? []).length > 0;
+  const hoursByDay = WEEKDAYS.map((d, i) => ({
+    day: d,
+    spans: (hours ?? []).filter((h) => h.weekday === i).map((h) => `${String(h.opens_at).slice(0, 5)}–${String(h.closes_at).slice(0, 5)}`),
+  }));
 
   const reports = (checkins ?? []) as unknown as Checkin[];
   const isOwner = !!user && user.id === station.created_by;
@@ -112,6 +120,19 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
               <Info label="Hours" value={station.hours} />
               <Info label="Pricing" value={station.price_info} />
             </dl>
+            {(hours ?? []).length > 0 && (
+              <div className="mt-4">
+                <h3 className="text-sm text-zinc-500">Opening hours ({station.time_zone})</h3>
+                <dl className="mt-1 grid grid-cols-[3rem_1fr] gap-x-3 gap-y-0.5 text-sm">
+                  {hoursByDay.map((d) => (
+                    <div key={d.day} className="contents">
+                      <dt className="text-zinc-500">{d.day}</dt>
+                      <dd>{d.spans.length ? d.spans.join(", ").replace("00:00–24:00", "Open 24 hours") : "Closed"}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            )}
             {isOwner && (
               <form action={deleteStation} className="mt-4 border-t border-zinc-100 pt-4 dark:border-zinc-800">
                 <input type="hidden" name="station_id" value={station.id} />
@@ -122,6 +143,15 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
         </div>
 
         <div className="space-y-4 lg:col-span-2">
+          {canBook && (
+            <section className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/10">
+              <h2 className="font-medium">Reserve a charging slot</h2>
+              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Pick a time, see the full price, then confirm. Free cancellation up to the cut-off.</p>
+              <Link href={`/stations/${station.id}/book`} className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-emerald-600 px-4 text-sm font-medium text-white hover:bg-emerald-700">
+                Book a slot
+              </Link>
+            </section>
+          )}
           <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
             <h2 className="font-medium">Report status</h2>
             {error && <p className="mt-2 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">{error}</p>}

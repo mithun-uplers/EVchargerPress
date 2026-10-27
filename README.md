@@ -22,6 +22,12 @@ The publishable key is safe for the browser; RLS protects the data.
   `http://localhost:3000/auth/confirm` to Redirect URLs.
 - **Auth → Providers → Email**: "Confirm email" on = users confirm via link; off = instant sign-in (handy for testing).
 
+## Bookings (reservation engine)
+Drivers can reserve a charging point at stations that take bookings (currently the 5 demo stations):
+`/stations/{id}/book` → hold → review the frozen price and rules → confirm; `/bookings` lists upcoming, completed,
+cancelled, expired and no-show bookings. All rules are enforced in Postgres. See [docs/BOOKING_ENGINE.md](docs/BOOKING_ENGINE.md)
+for the rules, status model and `/api/v1` endpoints, and [docs/TESTING.md](docs/TESTING.md) to run the tests.
+
 ## Data model
 | table | purpose | who can write |
 |---|---|---|

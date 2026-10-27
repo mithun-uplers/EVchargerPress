@@ -27,7 +27,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <Link href="/map" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white">
                 Map
               </Link>
-              <Link href="/stations/new" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white">
+              <Link href="/bookings" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white">
+                Bookings
+              </Link>
+              <Link href="/stations/new" className="hidden text-sm font-medium text-zinc-600 sm:inline hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white">
                 + Add station
               </Link>
               <Suspense fallback={<span className="h-8 w-16" />}>
