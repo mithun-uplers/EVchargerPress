@@ -160,7 +160,23 @@ export async function saveVehicle(_prev: FormState, formData: FormData): Promise
     p_types: types,
     p_powers: powers.map((p) => (p && !Number.isNaN(p) ? p : null)),
   });
-  if (cErr) return { error: dbError(cErr)! };
+  if (cErr) {
+    // Fallback while migration 20261029000002 (set_vehicle_connectors) isn't applied yet:
+    // insert the selected connectors directly (RLS allows owners to add; unticked ones can't be removed this way).
+    if (cErr.code === "PGRST202" || cErr.code === "42883") {
+      const { error: insErr } = await supabase.from("vehicle_connectors").upsert(
+        types.map((t, i) => ({
+          vehicle_id: vehicleId,
+          connector_type: t,
+          supported_power_kw: powers[i] && !Number.isNaN(powers[i]) ? powers[i] : null,
+        })),
+        { onConflict: "vehicle_id,connector_type", ignoreDuplicates: true },
+      );
+      if (insErr) return { error: dbError(insErr)! };
+    } else {
+      return { error: dbError(cErr)! };
+    }
+  }
 
   // First vehicle becomes the preferred one.
   if (!id) {
