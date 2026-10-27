@@ -25,6 +25,7 @@ export type StationSummary = {
   postal_code: string | null;
   data_source: "community" | "demo" | "openstreetmap";
   time_zone?: string;
+  is_bookable: boolean;
   external_id: string | null;
   source_updated_at: string | null;
   lat: number;

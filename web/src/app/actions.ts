@@ -30,7 +30,9 @@ export async function signUp(formData: FormData) {
   const email = str(formData.get("email"));
   const password = str(formData.get("password"));
   const displayName = str(formData.get("display_name"));
-  const next = safeNext(str(formData.get("next")) || "/");
+  // New accounts go through onboarding unless they were in the middle of something (e.g. a booking).
+  const requested = safeNext(str(formData.get("next")) || "/");
+  const next = requested === "/" ? "/onboarding" : requested;
   const origin = (await headers()).get("origin") ?? "";
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({

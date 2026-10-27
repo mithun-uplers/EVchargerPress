@@ -21,7 +21,15 @@ export type PriceSnapshot = {
   currency: string;
   duration_min: number;
   tariff: { id: string; name: string; source: string; tax_mode: "inclusive" | "exclusive"; tax_rate_bp: number };
-  assumptions: { evse_max_power_kw: number | null; assumed_power_share: number; estimated_kwh: number };
+  assumptions: {
+    evse_max_power_kw: number | null;
+    assumed_power_share: number;
+    estimated_kwh: number;
+    effective_power_kw?: number;
+    battery_capacity_kwh?: number | null;
+    power_basis?: string;
+  };
+  vehicle?: { id: string; label: string };
   lines: PriceLine[];
   reservation: { net_minor: number; tax_minor: number; total_minor: number };
   estimated_charging: { net_minor: number; tax_minor: number; total_minor: number };
@@ -56,6 +64,7 @@ export type BookingRow = {
   created_at: string;
   station: { id: string; name: string; address: string | null; city: string | null; city_is_approx: boolean; time_zone: string } | null;
   evse: { id: string; label: string; max_power_kw: number | null } | null;
+  vehicle: { id: string; make: string; model: string; nickname: string | null } | null;
 };
 
 /** Parses a Postgres tstzrange like ["2027-03-02 04:30:00+00","2027-03-02 05:30:00+00"). */

@@ -12,7 +12,7 @@ export default async function MapPage({ searchParams }: PageProps<"/map">) {
     Number.isFinite(lat) && Number.isFinite(lng) && sp.lat !== undefined ? [lng, lat] : undefined;
 
   return (
-    <div className="-mx-4 -my-6 flex h-[calc(100dvh-8.5rem)] flex-col sm:mx-0 sm:my-0 sm:h-[calc(100dvh-10rem)]">
+    <div className="-mx-4 -mt-6 flex h-[calc(100dvh-7.5rem)] flex-col md:mx-0 md:mt-0 md:h-[calc(100dvh-7rem)]">
       <div className="flex items-center justify-between gap-3 px-4 py-2 sm:px-0">
         <h1 className="text-lg font-semibold tracking-tight">Charging stations map</h1>
         <Link href="/" className="rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 dark:ring-zinc-700 dark:hover:bg-zinc-800">

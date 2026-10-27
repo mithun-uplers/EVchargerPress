@@ -26,6 +26,8 @@ const ERRORS: Record<string, { status: number; code: string }> = {
   EVB14: { status: 422, code: "no_tariff" },
   EVB15: { status: 400, code: "invalid_request" },
   EVB16: { status: 422, code: "check_in_window" },
+  EVB17: { status: 422, code: "incompatible_vehicle" },
+  EVB18: { status: 409, code: "vehicle_in_use" },
   "42501": { status: 403, code: "forbidden" },
   "40P01": { status: 409, code: "busy" }, // deadlock (should not happen: writes are queued per charging point)
   "40001": { status: 409, code: "busy" }, // serialization failure
@@ -73,7 +75,7 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
 const BOOKING_COLUMNS =
   "id,reference,status,period,hold_expires_at,price_snapshot,currency,reservation_fee_minor,estimated_total_minor," +
   "cancellation_fee_minor,confirmed_at,checked_in_at,cancelled_at,cancel_reason,created_at," +
-  "station:stations(id,name,address,city,city_is_approx,time_zone),evse:evses(id,label,max_power_kw)";
+  "station:stations(id,name,address,city,city_is_approx,time_zone),evse:evses(id,label,max_power_kw),vehicle:vehicles(id,make,model,nickname)";
 
 export async function getAvailability(stationId: string, date: string, durationMin: number): Promise<Slot[]> {
   return rpc<Slot[]>("get_availability", { p_station_id: stationId, p_date: date, p_duration_min: durationMin });
@@ -83,12 +85,27 @@ export async function quote(evseId: string, startAt: string, durationMin: number
   return rpc<Record<string, unknown>>("quote_booking", { p_evse_id: evseId, p_start: startAt, p_duration_min: durationMin });
 }
 
-export async function createBooking(input: { evseId: string; startAt: string; durationMin: number; idempotencyKey: string }) {
-  return rpc<{ id: string; reference: string; status: BookingStatus }>("create_booking", {
+export async function createBooking(input: {
+  evseId: string;
+  startAt: string;
+  durationMin: number;
+  idempotencyKey: string;
+  vehicleId?: string | null;
+}) {
+  return rpc<{ id: string; reference: string; status: BookingStatus }>("book_slot", {
     p_evse_id: input.evseId,
+    p_vehicle_id: input.vehicleId ?? null,
     p_start: input.startAt,
     p_duration_min: input.durationMin,
     p_idempotency_key: input.idempotencyKey,
+  });
+}
+
+/** Charging points at a station that the vehicle can plug into, with the power it can draw. */
+export async function compatibleEvses(vehicleId: string, stationId: string) {
+  return rpc<{ evse_id: string; effective_power_kw: number | null }[]>("compatible_evses", {
+    p_vehicle_id: vehicleId,
+    p_station_id: stationId,
   });
 }
 

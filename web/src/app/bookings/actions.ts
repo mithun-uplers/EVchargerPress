@@ -24,6 +24,7 @@ export async function holdSlot(_prev: ActionState, formData: FormData): Promise<
   const startAt = str(formData.get("start_at"));
   const durationMin = Number(str(formData.get("duration_min")));
   const key = str(formData.get("idempotency_key"));
+  const vehicleId = str(formData.get("vehicle_id"));
   const back = str(formData.get("back"));
 
   const user = await getCurrentUser();
@@ -37,7 +38,13 @@ export async function holdSlot(_prev: ActionState, formData: FormData): Promise<
 
   let reference: string;
   try {
-    ({ reference } = await createBooking({ evseId, startAt, durationMin, idempotencyKey: key }));
+    ({ reference } = await createBooking({
+      evseId,
+      startAt,
+      durationMin,
+      idempotencyKey: key,
+      vehicleId: UUID.test(vehicleId) ? vehicleId : null,
+    }));
   } catch (e) {
     return { error: message(e) };
   }

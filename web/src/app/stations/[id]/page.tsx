@@ -143,6 +143,19 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
         </div>
 
         <div className="space-y-4 lg:col-span-2">
+          {!canBook && (
+            <section className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
+              <h2 className="font-medium">Online booking isn’t available here</h2>
+              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+                {station.data_source === "openstreetmap"
+                  ? "This station comes from OpenStreetMap. We don’t have verified charging points, opening hours or prices for it, so we don’t take bookings — turn up and charge as usual."
+                  : "The operator hasn’t published bookable charging points, opening hours and prices for this station yet."}
+              </p>
+              <Link href="/?bookable=1" className="mt-3 inline-flex min-h-11 items-center rounded-lg px-4 text-sm font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200 hover:bg-emerald-50 dark:text-emerald-400 dark:ring-emerald-500/30">
+                Find bookable stations
+              </Link>
+            </section>
+          )}
           {canBook && (
             <section className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/10">
               <h2 className="font-medium">Reserve a charging slot</h2>

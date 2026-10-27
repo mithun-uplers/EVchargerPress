@@ -3,7 +3,8 @@ import { Suspense } from "react";
 import { NearMeButton } from "@/components/NearMeButton";
 import { StatusBadge } from "@/components/StatusBadge";
 import { timeAgo } from "@/lib/geo";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getCurrentUser } from "@/lib/supabase/server";
+import { getProfile } from "@/server/account";
 import { CONNECTOR_TYPES, SOURCE_LABEL, formatPlace, type StationSummary } from "@/lib/types";
 
 const PAGE_SIZE = 60;
@@ -14,6 +15,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const q = one(sp.q).replace(/[%,()*\\]/g, " ").trim().slice(0, 60);
   const connector = one(sp.connector);
   const workingOnly = one(sp.working) === "1";
+  const bookableOnly = one(sp.bookable) === "1";
   const lat = Number(one(sp.lat));
   const lng = Number(one(sp.lng));
   const hasLoc = one(sp.lat) !== "" && Number.isFinite(lat) && Number.isFinite(lng);
@@ -44,8 +46,14 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   }
   if ((CONNECTOR_TYPES as readonly string[]).includes(connector)) query = query.contains("connector_types", [connector]);
   if (workingOnly) query = query.eq("last_status", "working");
-  query = hasLoc ? query.limit(200) : query.order("is_demo", { ascending: true }).order("name").limit(PAGE_SIZE);
-  const { data, error, count } = await query;
+  if (bookableOnly) query = query.eq("is_bookable", true);
+  query = hasLoc ? query.limit(200) : query.order("is_bookable", { ascending: false }).order("name").limit(PAGE_SIZE);
+  const [{ data, error, count }, { count: bookableCount }, user] = await Promise.all([
+    query,
+    supabase.from("station_summaries").select("id", { count: "exact", head: true }).eq("is_bookable", true),
+    getCurrentUser(),
+  ]);
+  const profile = user ? await getProfile(user.id) : null;
 
   let stations = ((data ?? []) as StationSummary[]).map((s) => ({ ...s, distance: distances.get(s.id) ?? null }));
   if (hasLoc) stations = stations.sort((a, b) => (a.distance ?? 1e9) - (b.distance ?? 1e9));
@@ -83,6 +91,9 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             ))}
           </select>
           <label className="flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-sm">
+            <input type="checkbox" name="bookable" value="1" defaultChecked={bookableOnly} /> Bookable only
+          </label>
+          <label className="flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-sm">
             <input type="checkbox" name="working" value="1" defaultChecked={workingOnly} /> Working only
           </label>
           {hasLoc && (
@@ -94,6 +105,23 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           <button className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800">Search</button>
         </form>
       </section>
+
+      {user && profile && !profile.onboarded_at && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm dark:border-emerald-500/30 dark:bg-emerald-500/10">
+          <span>Finish setting up: add your vehicle so we only show chargers it can use.</span>
+          <Link href="/onboarding" className="inline-flex min-h-10 items-center rounded-lg bg-emerald-600 px-3 font-medium text-white hover:bg-emerald-700">Continue setup</Link>
+        </div>
+      )}
+
+      {!bookableOnly && (bookableCount ?? 0) > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-white p-4 text-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <span>
+            <strong>Online booking</strong> is available at {bookableCount} station{bookableCount === 1 ? "" : "s"} so far. Other stations come from
+            OpenStreetMap or drivers and are information only until an operator publishes chargers and prices.
+          </span>
+          <Link href="/?bookable=1" className="inline-flex min-h-10 items-center rounded-lg bg-emerald-600 px-3 font-medium text-white hover:bg-emerald-700">Show bookable</Link>
+        </div>
+      )}
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <p className="pt-2 text-sm text-zinc-500">
@@ -139,7 +167,14 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                     <h2 className="truncate font-medium">{s.name}</h2>
                     <p className="truncate text-sm text-zinc-500">{formatPlace(s)}</p>
                   </div>
-                  <StatusBadge status={s.last_status} />
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    {s.is_bookable ? (
+                      <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-xs font-medium text-white">Bookable</span>
+                    ) : (
+                      <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">Info only</span>
+                    )}
+                    <StatusBadge status={s.last_status} />
+                  </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {s.connector_types.length ? (

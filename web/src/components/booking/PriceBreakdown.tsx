@@ -49,9 +49,11 @@ export function PriceBreakdown({ snap }: { snap: PriceSnapshot }) {
           <Row label="Estimated charging cost" value={formatMoney(snap.estimated_charging.total_minor, c)} strong />
         </dl>
         <p className="mt-2 text-xs text-zinc-500">
-          Assumes the charger delivers about {Math.round(snap.assumptions.assumed_power_share * 100)}% of its{" "}
-          {snap.assumptions.evse_max_power_kw ?? "?"} kW rating ({snap.assumptions.estimated_kwh} kWh). Your real cost depends on your vehicle and
-          battery level and is settled at the station.
+          {snap.assumptions.effective_power_kw
+            ? <>Assumes about {Math.round(snap.assumptions.assumed_power_share * 100)}% of the {Number(snap.assumptions.effective_power_kw)} kW your vehicle can draw here
+                {snap.assumptions.battery_capacity_kwh ? `, capped at 80% of its ${Number(snap.assumptions.battery_capacity_kwh)} kWh battery` : ""} ({snap.assumptions.estimated_kwh} kWh).</>
+            : <>Assumes the charger delivers about {Math.round(snap.assumptions.assumed_power_share * 100)}% of its {snap.assumptions.evse_max_power_kw ?? "?"} kW rating ({snap.assumptions.estimated_kwh} kWh).</>}{" "}
+          Your real cost depends on your battery level and is settled at the station.
           {snap.idle_fee_per_min_minor ? ` Idle fee after charging: ${formatMoney(snap.idle_fee_per_min_minor, c)}/min.` : ""}
         </p>
       </div>

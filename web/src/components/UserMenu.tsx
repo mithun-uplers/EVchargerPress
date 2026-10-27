@@ -2,19 +2,26 @@ import Link from "next/link";
 import { signOut } from "@/app/actions";
 import { getCurrentUser } from "@/lib/supabase/server";
 
-export async function UserMenu() {
+export async function UserMenu({ compact = false }: { compact?: boolean }) {
   const user = await getCurrentUser();
   if (!user) {
     return (
-      <Link href="/login" className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700">
+      <Link href="/login" className="inline-flex min-h-10 items-center rounded-lg bg-emerald-600 px-3 text-sm font-medium text-white hover:bg-emerald-700">
         Sign in
       </Link>
     );
   }
+  if (compact) {
+    return (
+      <Link href="/profile" className="max-w-40 truncate text-sm text-zinc-500" aria-label="Your profile">
+        {user.email}
+      </Link>
+    );
+  }
   return (
-    <form action={signOut} className="flex items-center gap-3">
-      <span className="hidden text-sm text-zinc-500 sm:inline">{user.email}</span>
-      <button className="rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 dark:ring-zinc-700 dark:hover:bg-zinc-800">
+    <form action={signOut} className="space-y-2">
+      <p className="truncate text-xs text-zinc-500" title={user.email}>{user.email}</p>
+      <button className="min-h-10 w-full rounded-lg px-3 text-sm font-medium ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 dark:ring-zinc-700 dark:hover:bg-zinc-800">
         Sign out
       </button>
     </form>

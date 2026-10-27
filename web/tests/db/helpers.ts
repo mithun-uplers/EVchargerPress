@@ -94,7 +94,7 @@ export type StationOptions = {
     tax_rate_bp?: number;
     components: { type: string; price_minor: number }[];
   } | null;
-  evses?: { label: string; max_power_kw?: number; is_bookable?: boolean }[];
+  evses?: { label: string; max_power_kw?: number; is_bookable?: boolean; connectors?: { type: string; power_kw?: number | null }[] }[];
 };
 
 export const DEFAULT_TARIFF = {
@@ -139,6 +139,14 @@ export async function createStation(opts: StationOptions = {}) {
       [stationId, `E${i + 1}`, e.label, e.max_power_kw ?? 60, e.is_bookable ?? true],
     );
     evseIds.push(res.rows[0].id);
+    for (const c of e.connectors ?? [{ type: "CCS2", power_kw: e.max_power_kw ?? 60 }]) {
+      await db.query("insert into public.connectors (station_id, evse_id, type, power_kw) values ($1,$2,$3,$4)", [
+        stationId,
+        res.rows[0].id,
+        c.type,
+        c.power_kw ?? null,
+      ]);
+    }
   }
   if (opts.tariff !== null) {
     const t = { ...DEFAULT_TARIFF, ...(opts.tariff ?? {}) };
@@ -207,4 +215,37 @@ export async function events(bookingId: string) {
     [bookingId],
   );
   return rows as { from_status: string | null; to_status: string; reason: string | null }[];
+}
+
+export type VehicleOptions = {
+  vehicle_type?: string;
+  make?: string;
+  model?: string;
+  battery_capacity_kwh?: number | null;
+  max_ac_kw?: number | null;
+  max_dc_kw?: number | null;
+  connectors?: { type: string; supported_power_kw?: number | null }[];
+};
+
+/** Adds a vehicle as its owner (through RLS), with connector types. */
+export async function createVehicle(userId: string, opts: VehicleOptions = {}): Promise<string> {
+  const r = await asUser<{ id: string }>(
+    userId,
+    new Date().toISOString(),
+    `insert into public.vehicles (user_id, vehicle_type, make, model, battery_capacity_kwh, max_ac_kw, max_dc_kw)
+     values ($1,$2,$3,$4,$5,$6,$7) returning id`,
+    [userId, opts.vehicle_type ?? "car", opts.make ?? "Tata", opts.model ?? "Nexon EV", opts.battery_capacity_kwh ?? null,
+     opts.max_ac_kw ?? null, opts.max_dc_kw ?? null],
+  );
+  const id = expectOk(r).id;
+  for (const c of opts.connectors ?? [{ type: "CCS2" }]) {
+    expectOk(await asUser(userId, new Date().toISOString(),
+      "insert into public.vehicle_connectors (vehicle_id, connector_type, supported_power_kw) values ($1,$2,$3) returning vehicle_id",
+      [id, c.type, c.supported_power_kw ?? null]));
+  }
+  return id;
+}
+
+export function bookWithVehicle(userId: string, now: string, evseId: string, vehicleId: string | null, start: string, minutes = 60, key = newKey()) {
+  return asUser<Booking>(userId, now, "select * from public.book_slot($1, $2, $3, $4, $5)", [evseId, vehicleId, start, minutes, key]);
 }

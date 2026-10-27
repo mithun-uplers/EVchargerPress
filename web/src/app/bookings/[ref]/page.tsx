@@ -50,7 +50,10 @@ export default async function BookingPage({ params }: PageProps<"/bookings/[ref]
             {formatLocal(start, tz, { weekday: "long", day: "numeric", month: "long" })}, {formatTime(start, tz)}–{formatTime(end, tz)}{" "}
             <span className="text-zinc-500">({zoneLabel(tz, start)})</span>
           </p>
-          <p className="text-sm text-zinc-500">{b.evse?.label}{b.evse?.max_power_kw ? ` · ${Number(b.evse.max_power_kw)} kW` : ""}</p>
+          <p className="text-sm text-zinc-500">
+            {b.evse?.label}{b.evse?.max_power_kw ? ` · ${Number(b.evse.max_power_kw)} kW` : ""}
+            {b.price_snapshot.vehicle ? ` · ${b.price_snapshot.vehicle.label}` : ""}
+          </p>
         </div>
         <BookingStatusBadge status={status} />
       </div>

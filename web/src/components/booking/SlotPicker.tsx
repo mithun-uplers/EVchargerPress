@@ -10,12 +10,14 @@ type Props = {
   timeZone: string;
   durationMin: number;
   slots: Slot[];
-  evses: { id: string; label: string; max_power_kw: number | null; connectors: string[] }[];
+  evses: { id: string; label: string; max_power_kw: number | null; connectors: string[]; effective_power_kw?: number | null }[];
   back: string;
   signedIn: boolean;
+  vehicleId?: string | null;
+  vehicleLabel?: string | null;
 };
 
-export function SlotPicker({ stationId, timeZone, durationMin, slots, evses, back, signedIn }: Props) {
+export function SlotPicker({ stationId, timeZone, durationMin, slots, evses, back, signedIn, vehicleId, vehicleLabel }: Props) {
   const [state, formAction, pending] = useActionState<ActionState, FormData>(holdSlot, null);
   const [selected, setSelected] = useState<{ evseId: string; start: string; end: string } | null>(null);
   // One key per selected slot: a double click or a retry after a network blip reuses it,
@@ -52,6 +54,7 @@ export function SlotPicker({ stationId, timeZone, durationMin, slots, evses, bac
               </h3>
               <p className="text-xs text-zinc-500">
                 {[e.max_power_kw ? `${Number(e.max_power_kw)} kW` : null, e.connectors.join(", ") || null].filter(Boolean).join(" · ")}
+                {e.effective_power_kw ? ` · your vehicle: up to ${Number(e.effective_power_kw)} kW` : ""}
               </p>
             </div>
             <div role="radiogroup" aria-label={`Start times on ${e.label}`} className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8">
@@ -85,6 +88,7 @@ export function SlotPicker({ stationId, timeZone, durationMin, slots, evses, bac
         <input type="hidden" name="start_at" value={selected?.start ?? ""} />
         <input type="hidden" name="duration_min" value={durationMin} />
         <input type="hidden" name="idempotency_key" value={key} />
+        <input type="hidden" name="vehicle_id" value={vehicleId ?? ""} />
         <input type="hidden" name="back" value={back} />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm" aria-live="polite">
@@ -93,7 +97,9 @@ export function SlotPicker({ stationId, timeZone, durationMin, slots, evses, bac
                 <span className="font-medium">
                   {evses.find((e) => e.id === selected.evseId)?.label} · {formatTime(selected.start, timeZone)}–{formatTime(selected.end, timeZone)}
                 </span>
-                <span className="block text-xs text-zinc-500">You’ll review the price and cancellation rules before confirming.</span>
+                <span className="block text-xs text-zinc-500">
+                  {vehicleLabel ? `For ${vehicleLabel}. ` : ""}You’ll review the price and cancellation rules before confirming.
+                </span>
               </>
             ) : (
               <span className="text-zinc-500">Select a start time.</span>

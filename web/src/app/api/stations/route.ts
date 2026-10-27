@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient();
   let query = supabase
     .from("station_summaries")
-    .select("id,name,lat,lng,address,city,city_is_approx,last_status,max_power_kw,connector_types,data_source")
+    .select("id,name,lat,lng,address,city,city_is_approx,last_status,max_power_kw,connector_types,data_source,is_bookable")
     .gte("lat", Math.max(-90, south))
     .lte("lat", Math.min(90, north))
     .gte("lng", Math.max(-180, west))
@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
       max_kw: Number(s.max_power_kw) || 0,
       connectors: (s.connector_types ?? []).join(", "),
       source: s.data_source,
+      bookable: s.is_bookable ? 1 : 0,
     },
   }));
 
