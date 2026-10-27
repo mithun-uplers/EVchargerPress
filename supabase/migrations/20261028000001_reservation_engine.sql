@@ -7,7 +7,6 @@
 
 create extension if not exists btree_gist with schema extensions;
 create schema if not exists app;
-revoke all on schema app from public;
 
 -- ---------- Clock -------------------------------------------------------
 -- app.now() = now(), except that tests (any connection that is not the
@@ -467,10 +466,13 @@ begin
   -- 1. Idempotency. The first request with a key wins; repeats return the same booking.
   --    A concurrent repeat blocks on this insert until the first transaction finishes.
   v_hash := md5(concat_ws('|', p_evse_id::text, extract(epoch from p_start)::bigint::text, p_duration_min::text));
-  delete from public.idempotency_keys where user_id = uid and key = p_idempotency_key and expires_at <= v_now;
+  --    An expired key (older than 24 h) is recycled as if it were new.
   insert into public.idempotency_keys (user_id, key, endpoint, request_hash, expires_at)
   values (uid, p_idempotency_key, 'create_booking', v_hash, v_now + interval '24 hours')
-  on conflict (user_id, key) do nothing;
+  on conflict (user_id, key) do update
+    set endpoint = excluded.endpoint, request_hash = excluded.request_hash, booking_id = null,
+        created_at = v_now, expires_at = excluded.expires_at
+    where public.idempotency_keys.expires_at <= v_now;
   if not found then
     select * into k from public.idempotency_keys ik where ik.user_id = uid and ik.key = p_idempotency_key;
     if k.request_hash <> v_hash or k.endpoint <> 'create_booking' then
@@ -625,8 +627,7 @@ begin
   get diagnostics n_done = row_count;
   perform set_config('app.transition_reason', '', true);
 
-  delete from public.idempotency_keys where expires_at <= v_now;
-  get diagnostics n_keys = row_count;
+  n_keys := app.purge_idempotency_keys(v_now);   -- defined in 20261028000002
   return jsonb_build_object('expired', n_exp, 'no_show', n_ns, 'completed', n_done, 'keys_purged', n_keys);
 end $$;
 
@@ -650,23 +651,8 @@ create policy "own bookings readable" on public.bookings for select to authentic
   using (user_id = (select auth.uid()));
 create policy "own booking events readable" on public.booking_events for select to authenticated
   using (exists (select 1 from public.bookings b where b.id = booking_id and b.user_id = (select auth.uid())));
--- No insert/update/delete policies: bookings change only through the functions above.
+-- No write policies: bookings change only through the functions above.
 -- idempotency_keys has no policies at all (internal table).
-
--- ---------- Function privileges ----------------------------------------
-revoke execute on all functions in schema app from public, anon, authenticated;
-revoke execute on function public.get_availability(uuid, date, int) from public;
-revoke execute on function public.quote_booking(uuid, timestamptz, int) from public;
-revoke execute on function public.create_booking(uuid, timestamptz, int, text) from public, anon;
-revoke execute on function public.confirm_booking(uuid) from public, anon;
-revoke execute on function public.cancel_booking(uuid, text) from public, anon;
-revoke execute on function public.check_in_booking(uuid) from public, anon;
-grant execute on function public.get_availability(uuid, date, int) to anon, authenticated;
-grant execute on function public.quote_booking(uuid, timestamptz, int) to anon, authenticated;
-grant execute on function public.create_booking(uuid, timestamptz, int, text) to authenticated;
-grant execute on function public.confirm_booking(uuid) to authenticated;
-grant execute on function public.cancel_booking(uuid, text) to authenticated;
-grant execute on function public.check_in_booking(uuid) to authenticated;
 
 -- ---------- Expose the station time zone in the summary view -----------
 create or replace view public.station_summaries with (security_invoker = true) as

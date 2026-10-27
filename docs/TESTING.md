@@ -38,6 +38,7 @@ cancellation rules (free window, late fee from snapshot, after start, repeat, ot
 status transitions, immutability, RLS and pricing.
 
 Last run: 2026-10-28, Postgres 16.15 + PostGIS: 58 passed (48 database, 10 unit).
+Live smoke test on Supabase (rolled back): availability → hold → idempotent repeat → confirm → cancel, all as expected.
 
 ## Unit tests (`web/tests/unit`)
 

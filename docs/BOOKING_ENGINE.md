@@ -1,7 +1,7 @@
 # Reservation engine (Module F)
 
 Customers reserve **one charging point (EVSE) for one time window**. Every rule lives in Postgres
-(`supabase/migrations/20261028000001_reservation_engine.sql`), so the web app, the `/api/v1` API and any
+(`supabase/migrations/20261028000001_reservation_engine.sql` and `…000002_reservation_engine_privileges.sql`), so the web app, the `/api/v1` API and any
 future client get identical behaviour. No payments and no charger hardware are involved yet.
 
 ## Flow
@@ -13,7 +13,7 @@ future client get identical behaviour. No payments and no charger hardware are i
 4. **Check in**: `check_in_booking(id)` from `check_in_early_min` before to `no_show_grace_min` after the start (manual, no hardware).
 5. **Cancel**: `cancel_booking(id, reason)`, free for holds; for confirmed bookings free until
    `free_cancel_until_min` before the start, then the reservation fee is recorded as a late-cancellation fee; impossible after the start.
-6. **Sweeper**: `app.sweep_bookings()` runs every minute (pg_cron) to expire holds, mark no-shows, complete finished check-ins and purge old idempotency keys.
+6. **Sweeper**: `app.sweep_bookings()` runs every minute (pg_cron job `ev-booking-sweeper`, scheduled in Supabase) to expire holds, mark no-shows, complete finished check-ins and purge old idempotency keys.
 
 ## Status model
 
