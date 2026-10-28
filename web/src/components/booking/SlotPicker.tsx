@@ -41,13 +41,13 @@ export function SlotPicker({ stationId, timeZone, durationMin, slots, evses, bac
   return (
     <div className="space-y-6">
       {bookable.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-zinc-300 p-8 text-center dark:border-zinc-700">
+        <div className="rounded-2xl border border-dashed border-zinc-300 bg-white/60 p-8 text-center dark:border-zinc-700">
           <p className="font-medium">No free slots for this day and duration.</p>
           <p className="mt-1 text-sm text-zinc-500">Try another day or a shorter duration.</p>
         </div>
       ) : (
         bookable.map((e) => (
-          <section key={e.id} aria-labelledby={`evse-${e.id}`} className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+          <section key={e.id} aria-labelledby={`evse-${e.id}`} className="rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200/70 p-4 dark:bg-zinc-900 dark:ring-zinc-800">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <h3 id={`evse-${e.id}`} className="font-medium">
                 {e.label}
@@ -67,9 +67,9 @@ export function SlotPicker({ stationId, timeZone, durationMin, slots, evses, bac
                     role="radio"
                     aria-checked={active}
                     onClick={() => choose(e.id, s)}
-                    className={`min-h-11 rounded-lg border px-2 py-2 text-sm tabular-nums transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-energy-600 ${
+                    className={`min-h-11 rounded-xl border px-2 py-2 text-sm tabular-nums transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-energy-600 ${
                       active
-                        ? "border-energy-600 bg-energy-600 font-semibold text-white"
+                        ? "border-charge-400 bg-charge-400 font-semibold text-zinc-900 shadow-sm"
                         : "border-zinc-300 hover:border-energy-500 hover:bg-energy-50 dark:border-zinc-700 dark:hover:bg-energy-500/10"
                     }`}
                   >
@@ -82,7 +82,7 @@ export function SlotPicker({ stationId, timeZone, durationMin, slots, evses, bac
         ))
       )}
 
-      <form action={formAction} className="sticky bottom-3 z-10 rounded-xl border border-zinc-200 bg-white/95 p-4 shadow-lg backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95">
+      <form action={formAction} className="sticky bottom-20 z-10 rounded-2xl bg-white/95 p-4 shadow-lg ring-1 ring-zinc-200/70 backdrop-blur md:bottom-3 dark:bg-zinc-900/95 dark:ring-zinc-800">
         <input type="hidden" name="station_id" value={stationId} />
         <input type="hidden" name="evse_id" value={selected?.evseId ?? ""} />
         <input type="hidden" name="start_at" value={selected?.start ?? ""} />
@@ -107,13 +107,13 @@ export function SlotPicker({ stationId, timeZone, durationMin, slots, evses, bac
           </p>
           <button
             disabled={!selected || pending}
-            className="min-h-11 rounded-lg bg-energy-600 px-5 text-sm font-medium text-white hover:bg-energy-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-11 rounded-xl bg-energy-600 shadow-sm px-5 text-sm font-medium text-white hover:bg-energy-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {pending ? "Holding…" : signedIn ? "Hold this slot" : "Sign in to book"}
           </button>
         </div>
         {state?.error && (
-          <p role="alert" className="mt-3 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">
+          <p role="alert" className="mt-3 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">
             {state.error}
           </p>
         )}

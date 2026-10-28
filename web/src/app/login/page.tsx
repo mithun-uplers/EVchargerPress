@@ -1,63 +1,61 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { signIn, signUp } from "@/app/actions";
+import { AuthShell } from "@/components/AuthShell";
+import { ui } from "@/lib/ui";
 
 export const metadata: Metadata = { title: "Sign in" };
-
-const input = "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900";
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const sp = await searchParams;
   const s = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : "");
   const signup = s("mode") === "signup";
   const next = s("next") || "/";
+  const tab = (active: boolean) =>
+    `flex-1 rounded-lg py-2 text-center text-sm font-medium transition ${active ? "bg-white text-energy-800 shadow-sm dark:bg-zinc-800 dark:text-white" : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"}`;
 
   return (
-    <div className="mx-auto max-w-sm py-8">
-      <h1 className="text-2xl font-semibold tracking-tight">{signup ? "Create an account" : "Sign in"}</h1>
-      <p className="mt-1 text-sm text-zinc-500">
-        {signup ? "Report charger status and add stations." : "Welcome back to EVChargePress."}
-      </p>
-      {s("error") && <p className="mt-4 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">{s("error")}</p>}
-      {s("message") && <p className="mt-4 rounded-md bg-energy-50 px-3 py-2 text-sm text-energy-800 dark:bg-energy-500/10 dark:text-energy-300">{s("message")}</p>}
+    <AuthShell
+      title={signup ? "Create your account" : "Welcome back"}
+      subtitle={signup ? "Add your vehicle, book chargers and track your charging." : "Sign in to book chargers and see your charging."}
+      footer={
+        <>
+          By continuing you agree to use EVChargePress responsibly. Station data from drivers and © OpenStreetMap contributors.
+        </>
+      }
+    >
+      <nav aria-label="Account" className="mb-5 flex gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-950">
+        <Link href={`/login?${new URLSearchParams({ next })}`} aria-current={!signup ? "page" : undefined} className={tab(!signup)}>Sign in</Link>
+        <Link href={`/login?${new URLSearchParams({ mode: "signup", next })}`} aria-current={signup ? "page" : undefined} className={tab(signup)}>Create account</Link>
+      </nav>
+      {s("error") && <p className={`mb-4 ${ui.error}`}>{s("error")}</p>}
+      {s("message") && <p className={`mb-4 ${ui.ok}`}>{s("message")}</p>}
 
-      <form action={signup ? signUp : signIn} className="mt-6 space-y-4">
+      <form action={signup ? signUp : signIn} className="space-y-4">
         <input type="hidden" name="next" value={next} />
         {signup && (
           <label className="block text-sm font-medium">
             Display name
-            <input name="display_name" maxLength={40} className={input} />
+            <input name="display_name" maxLength={40} autoComplete="nickname" className={ui.input} />
           </label>
         )}
         <label className="block text-sm font-medium">
           Email
-          <input name="email" type="email" required autoComplete="email" className={input} />
+          <input name="email" type="email" required autoComplete="email" className={ui.input} />
         </label>
         <label className="block text-sm font-medium">
           Password
-          <input name="password" type="password" required minLength={8} autoComplete={signup ? "new-password" : "current-password"} className={input} />
+          <input name="password" type="password" required minLength={8} autoComplete={signup ? "new-password" : "current-password"} className={ui.input} />
+          {signup && <span className="mt-1 block text-xs font-normal text-zinc-500">At least 8 characters.</span>}
         </label>
         {!signup && (
           <p className="-mt-2 text-right text-sm">
-            <Link href="/forgot-password" className="font-medium text-energy-700 hover:underline dark:text-energy-400">
-              Forgot password?
-            </Link>
+            <Link href="/forgot-password" className={ui.link}>Forgot password?</Link>
           </p>
         )}
-        <button className="w-full rounded-lg bg-energy-600 py-2.5 text-sm font-medium text-white hover:bg-energy-700">
-          {signup ? "Create account" : "Sign in"}
-        </button>
+        <button className={`${ui.btn} w-full`}>{signup ? "Create account" : "Sign in"}</button>
       </form>
-
-      <p className="mt-6 text-center text-sm text-zinc-500">
-        {signup ? "Already have an account? " : "New here? "}
-        <Link
-          href={`/login?${new URLSearchParams({ ...(signup ? {} : { mode: "signup" }), next })}`}
-          className="font-medium text-energy-700 hover:underline dark:text-energy-400"
-        >
-          {signup ? "Sign in" : "Create an account"}
-        </Link>
-      </p>
-    </div>
+      {signup && <p className="mt-4 text-xs text-zinc-500">We’ll email you a link to confirm your address before you can sign in.</p>}
+    </AuthShell>
   );
 }

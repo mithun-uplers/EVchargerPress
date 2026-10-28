@@ -21,7 +21,7 @@ export function LocationFields() {
   }
 
   const input =
-    "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900";
+    "mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900";
   return (
     <div>
       <div className="grid grid-cols-2 gap-3">

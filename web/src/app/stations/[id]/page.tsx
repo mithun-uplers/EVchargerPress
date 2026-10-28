@@ -4,12 +4,12 @@ import { notFound } from "next/navigation";
 import { addCheckin, deleteStation } from "@/app/actions";
 import { StatusBadge } from "@/components/StatusBadge";
 import { EvseLivePanel } from "@/components/live/EvseLivePanel";
-import { StationLiveBadge } from "@/components/live/LiveBadge";
+import { StationHero } from "@/components/stations/StationBlocks";
 import { getEvseLive } from "@/server/live";
 import { WEEKDAYS } from "@/lib/format";
 import { timeAgo } from "@/lib/geo";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
-import { SOURCE_LABEL, formatPlace, type Checkin, type Connector, type StationSummary } from "@/lib/types";
+import { type Checkin, type Connector, type StationSummary } from "@/lib/types";
 
 const UUID = /^[0-9a-f-]{36}$/i;
 
@@ -58,7 +58,6 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
   const d = 0.01;
   const bbox = [station.lng - d, station.lat - d, station.lng + d, station.lat + d].join(",");
   const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${station.lat},${station.lng}`;
-  const directions = `https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lng}`;
 
   return (
     <div className="space-y-6">
@@ -66,42 +65,14 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
         ← All stations
       </Link>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{station.name}</h1>
-            <StatusBadge status={station.last_status} />
-            <StationLiveBadge s={station} />
-          </div>
-          <p className="mt-1 text-zinc-500">{formatPlace(station)}</p>
-          {station.is_demo && <p className="mt-1 text-xs text-amber-600">Demo data — not a real station.</p>}
-          {station.data_source === "openstreetmap" && (
-            <p className="mt-1 text-xs text-zinc-500">
-              {SOURCE_LABEL.openstreetmap}
-              {station.external_id && (
-                <>
-                  {" · "}
-                  <a href={`https://www.openstreetmap.org/${station.external_id}`} target="_blank" rel="noreferrer" className="underline">
-                    view or fix on OpenStreetMap
-                  </a>
-                </>
-              )}
-              {station.source_updated_at && <> · data as of {new Date(station.source_updated_at).toLocaleDateString("en-IN")}</>}
-              {station.city_is_approx && <> · town is the nearest one, not a postal address</>}
-            </p>
-          )}
-        </div>
-        <a href={directions} target="_blank" rel="noreferrer" className="rounded-lg bg-energy-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-energy-700">
-          Get directions
-        </a>
-      </div>
+      <StationHero station={station} canBook={canBook} />
 
       <div className="grid gap-6 lg:grid-cols-5">
         <div className="space-y-6 lg:col-span-3">
-          <iframe title="Map" src={mapSrc} className="h-64 w-full rounded-xl border border-zinc-200 dark:border-zinc-800" loading="lazy" />
+          <iframe title="Map" src={mapSrc} className="h-64 w-full rounded-2xl shadow-sm ring-1 ring-zinc-200/70 dark:ring-zinc-800" loading="lazy" />
 
-          <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <h2 className="font-medium">Connectors</h2>
+          <section className="rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200/70 p-4 dark:bg-zinc-900 dark:ring-zinc-800">
+            <h2 className="font-semibold">Connectors</h2>
             {!(connectors as Connector[] | null)?.length && (
               <p className="mt-2 text-sm text-zinc-500">The source doesn’t list connector types for this station.</p>
             )}
@@ -117,8 +88,8 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
             </ul>
           </section>
 
-          <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <h2 className="font-medium">Details</h2>
+          <section className="rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200/70 p-4 dark:bg-zinc-900 dark:ring-zinc-800">
+            <h2 className="font-semibold">Details</h2>
             <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
               <Info label="Operator" value={station.operator} />
               <Info label="Access" value={station.access === "restricted" ? "Restricted" : "Public"} />
@@ -150,8 +121,8 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
         <div className="space-y-4 lg:col-span-2">
           <EvseLivePanel stationId={station.id} initial={evseLive} />
           {!canBook && (
-            <section className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
-              <h2 className="font-medium">Online booking isn’t available here</h2>
+            <section className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:bg-zinc-900 dark:ring-zinc-800">
+              <h2 className="font-semibold">Online booking isn’t available here</h2>
               <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
                 {station.data_source === "openstreetmap"
                   ? "This station comes from OpenStreetMap. We don’t have verified charging points, opening hours or prices for it, so we don’t take bookings — turn up and charge as usual."
@@ -163,17 +134,17 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
             </section>
           )}
           {canBook && (
-            <section className="rounded-xl border border-energy-200 bg-energy-50 p-4 dark:border-energy-500/30 dark:bg-energy-500/10">
-              <h2 className="font-medium">Reserve a charging slot</h2>
+            <section className="rounded-2xl bg-energy-50 p-4 ring-1 ring-inset ring-energy-200 dark:bg-energy-500/10 dark:ring-energy-500/30">
+              <h2 className="font-semibold">Reserve a charging slot</h2>
               <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Pick a time, see the full price, then confirm. Free cancellation up to the cut-off.</p>
-              <Link href={`/stations/${station.id}/book`} className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-energy-600 px-4 text-sm font-medium text-white hover:bg-energy-700">
+              <Link href={`/stations/${station.id}/book`} className="mt-3 inline-flex min-h-11 items-center rounded-xl bg-energy-600 shadow-sm px-4 text-sm font-medium text-white hover:bg-energy-700">
                 Book a slot
               </Link>
             </section>
           )}
-          <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <h2 className="font-medium">Report status</h2>
-            {error && <p className="mt-2 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">{error}</p>}
+          <section className="rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200/70 p-4 dark:bg-zinc-900 dark:ring-zinc-800">
+            <h2 className="font-semibold">Report status</h2>
+            {error && <p className="mt-2 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">{error}</p>}
             {user ? (
               <form action={addCheckin} className="mt-3 space-y-3">
                 <input type="hidden" name="station_id" value={station.id} />
@@ -181,7 +152,7 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
                   {(["working", "busy", "broken"] as const).map((s, i) => (
                     <label key={s} className="cursor-pointer">
                       <input type="radio" name="status" value={s} defaultChecked={i === 0} className="peer sr-only" />
-                      <span className="block rounded-lg border border-zinc-300 px-2 py-2 text-center text-sm capitalize peer-checked:border-energy-600 peer-checked:bg-energy-50 peer-checked:font-medium dark:border-zinc-700 dark:peer-checked:bg-energy-500/10">
+                      <span className="block rounded-xl border border-zinc-300 px-2 py-2 text-center text-sm capitalize peer-checked:border-energy-600 peer-checked:bg-energy-50 peer-checked:font-medium dark:border-zinc-700 dark:peer-checked:bg-energy-500/10">
                         {s}
                       </span>
                     </label>
@@ -192,9 +163,9 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
                   maxLength={500}
                   rows={3}
                   placeholder="Optional: e.g. 'CCS2 #2 out of order, #1 fine'"
-                  className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950"
+                  className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950"
                 />
-                <button className="w-full rounded-lg bg-zinc-900 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900">
+                <button className="w-full rounded-xl bg-zinc-900 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900">
                   Submit report
                 </button>
               </form>
@@ -208,8 +179,8 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
             )}
           </section>
 
-          <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <h2 className="font-medium">Recent reports</h2>
+          <section className="rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200/70 p-4 dark:bg-zinc-900 dark:ring-zinc-800">
+            <h2 className="font-semibold">Recent reports</h2>
             {reports.length ? (
               <ul className="mt-3 space-y-3">
                 {reports.map((c) => (

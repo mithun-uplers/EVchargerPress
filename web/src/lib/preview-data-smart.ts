@@ -3,11 +3,13 @@
  * /preview/station, /preview/home). Only used when ENABLE_DESIGN_PREVIEW=1.
  */
 import type { RouteResult } from "@/components/route/RoutePlanView";
+import type { BookingRow } from "@/lib/booking-types";
 import type { EvseLive, LiveSessionData, LiveSample } from "@/lib/live";
 import type { Recommendation } from "@/lib/recommend";
 import type { RouteStation } from "@/lib/route-plan";
 import { planRoute } from "@/lib/route-plan";
 import { PREVIEW_NOW } from "@/lib/preview-data";
+import type { StationSummary } from "@/lib/types";
 
 const START = Date.parse("2026-10-28T09:04:00Z");
 const NOW_ISO = PREVIEW_NOW.toISOString(); // 09:30Z
@@ -71,4 +73,43 @@ export const previewRecs: Recommendation[] = [
   { station: { id: "a", name: "Demo Hub — Ahmedabad", city: "Ahmedabad", operator: "Demo Hub", is_bookable: true, max_power_kw: 60, connector_types: ["CCS2"], last_status: "working", live_evse_count: 4, live_available_count: 2, live_is_simulated: true, distance_km: 2.4, energy_price_minor: 2000, visits: 3 }, score: 80, reasons: ["2.4 km away", "2 of 4 free now (simulated)", "You’ve charged here 3 times"], warnings: [] },
   { station: { id: "b", name: "GreenPlug SG Highway (sample)", city: "Ahmedabad", operator: "GreenPlug", is_bookable: false, max_power_kw: 50, connector_types: ["CCS2"], last_status: null, live_evse_count: null, live_available_count: null, live_is_simulated: null, distance_km: 5.1, energy_price_minor: 1700, visits: 2 }, score: 61, reasons: ["5.1 km away", "₹17/kWh — below your average ₹20", "You’ve charged here 2 times"], warnings: [] },
   { station: { id: "c", name: "VoltGrid Riverfront (sample)", city: "Ahmedabad", operator: "VoltGrid", is_bookable: true, max_power_kw: 120, connector_types: ["CCS2"], last_status: null, live_evse_count: 2, live_available_count: 0, live_is_simulated: true, distance_km: 3.2, energy_price_minor: null, visits: 0 }, score: 40, reasons: ["3.2 km away", "Book a slot ahead", "Fits your car (CCS2)"], warnings: ["All 2 busy right now (simulated)"] },
+];
+
+// ---- Redesign previews: station list, station header, bookings ----
+
+const baseStation: StationSummary = {
+  id: "00000000-0000-4000-8000-0000000000s1", name: "Demo Hub — Ahmedabad", address: "CG Road", city: "Ahmedabad", city_is_approx: false,
+  state: "Gujarat", postal_code: "380009", data_source: "demo", time_zone: "Asia/Kolkata", is_bookable: true, external_id: null,
+  source_updated_at: null, lat: 23.03, lng: 72.56, operator: "Demo Hub", access: "public", hours: "24 hours", price_info: "₹20/kWh (demo)",
+  is_demo: true, created_by: null, created_at: "2026-10-01T00:00:00Z", last_status: "working", last_checkin_at: "2026-10-28T08:40:00Z",
+  max_power_kw: 60, connector_types: ["CCS2", "Type 2"], live_evse_count: 4, live_available_count: 2, live_is_simulated: true,
+  live_updated_at: "2026-10-28T09:29:50Z",
+};
+export const previewStations: (StationSummary & { distance: number | null })[] = [
+  { ...baseStation, distance: 2.4 },
+  { ...baseStation, id: "s2", name: "GreenPlug SG Highway (sample)", address: "SG Highway", operator: "GreenPlug", is_bookable: false, is_demo: false,
+    data_source: "community", max_power_kw: 50, connector_types: ["CCS2"], live_evse_count: null, live_available_count: null, live_is_simulated: null,
+    last_status: "busy", price_info: null, distance: 5.1 },
+  { ...baseStation, id: "s3", name: "Ather Grid Navrangpura", address: null, operator: "Ather", is_bookable: false, is_demo: false,
+    data_source: "openstreetmap", max_power_kw: 3.3, connector_types: ["Other"], live_evse_count: null, live_available_count: null, live_is_simulated: null,
+    last_status: null, last_checkin_at: null, price_info: null, distance: 6.8 },
+  { ...baseStation, id: "s4", name: "VoltGrid Riverfront (sample)", address: "Ashram Road", operator: "VoltGrid", max_power_kw: 120, connector_types: ["CCS2"],
+    live_evse_count: 2, live_available_count: 0, last_status: "working", is_demo: false, data_source: "community", distance: 3.2 },
+];
+export const previewStation = baseStation;
+
+const snap = { policy: { hold_minutes: 10, buffer_min: 10, free_cancel_until_min: 60, check_in_early_min: 15, no_show_grace_min: 15, time_zone: "Asia/Kolkata" } } as unknown as BookingRow["price_snapshot"];
+const bk = (o: Partial<BookingRow>): BookingRow => ({
+  id: crypto.randomUUID(), reference: "EV-DEMO7Q2K", status: "confirmed", period: '["2026-10-29 03:30:00+00","2026-10-29 04:30:00+00")',
+  hold_expires_at: null, price_snapshot: snap, currency: "INR", reservation_fee_minor: 5900, estimated_total_minor: 80618, cancellation_fee_minor: null,
+  confirmed_at: null, checked_in_at: null, cancelled_at: null, cancel_reason: null, created_at: "2026-10-27T10:00:00Z",
+  station: { id: "s", name: "Demo Hub — Ahmedabad", address: "CG Road", city: "Ahmedabad", city_is_approx: false, time_zone: "Asia/Kolkata" },
+  evse: { id: "e", label: "DC fast charger 1", max_power_kw: 60, charge_point_id: "cp" },
+  vehicle: { id: "v", make: "Sample Motors", model: "City EV", nickname: "Daily driver" }, ...o,
+});
+export const previewBookings: BookingRow[] = [
+  bk({ status: "checked_in", reference: "EV-DEMO7Q2K", period: '["2026-10-28 09:00:00+00","2026-10-28 10:00:00+00")' }),
+  bk({ reference: "EV-9X3PK2MD" }),
+  bk({ status: "pending", reference: "EV-2H7DQ8RT", hold_expires_at: "2026-10-28T09:38:00Z", period: '["2026-11-02 12:00:00+00","2026-11-02 12:45:00+00")',
+    evse: { id: "e2", label: "AC charger 1", max_power_kw: 7.4, charge_point_id: null }, estimated_total_minor: 27100 }),
 ];

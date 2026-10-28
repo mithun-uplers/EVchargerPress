@@ -42,7 +42,7 @@ export function ConfirmButton({ reference }: { reference: string }) {
   return (
     <form action={action} className="space-y-2">
       <input type="hidden" name="reference" value={reference} />
-      <button disabled={pending} className="min-h-11 w-full rounded-lg bg-energy-600 px-5 text-sm font-medium text-white hover:bg-energy-700 disabled:opacity-60">
+      <button disabled={pending} className="min-h-11 w-full rounded-xl bg-energy-600 px-5 text-sm font-semibold text-white shadow-sm hover:bg-energy-700 disabled:opacity-60">
         {pending ? "Confirming…" : "Confirm booking"}
       </button>
       <Feedback state={state} />
@@ -55,7 +55,7 @@ export function CheckInButton({ reference }: { reference: string }) {
   return (
     <form action={action} className="space-y-2">
       <input type="hidden" name="reference" value={reference} />
-      <button disabled={pending} className="min-h-11 w-full rounded-lg bg-energy-600 px-5 text-sm font-medium text-white hover:bg-energy-700 disabled:opacity-60">
+      <button disabled={pending} className="min-h-11 w-full rounded-xl bg-energy-600 px-5 text-sm font-semibold text-white shadow-sm hover:bg-energy-700 disabled:opacity-60">
         {pending ? "Checking in…" : "I’ve arrived — check in"}
       </button>
       <Feedback state={state} />
@@ -68,24 +68,24 @@ export function CancelForm({ reference, feeNote }: { reference: string; feeNote:
   const [open, setOpen] = useState(false);
   if (!open) {
     return (
-      <button type="button" onClick={() => setOpen(true)} className="min-h-11 w-full rounded-lg px-5 text-sm font-medium text-rose-700 ring-1 ring-inset ring-rose-200 hover:bg-rose-50 dark:text-rose-300 dark:ring-rose-500/30 dark:hover:bg-rose-500/10">
+      <button type="button" onClick={() => setOpen(true)} className="min-h-11 w-full rounded-xl px-5 text-sm font-medium text-rose-700 ring-1 ring-inset ring-rose-200 hover:bg-rose-50 dark:text-rose-300 dark:ring-rose-500/30 dark:hover:bg-rose-500/10">
         Cancel booking
       </button>
     );
   }
   return (
-    <form action={action} className="space-y-3 rounded-lg border border-rose-200 p-3 dark:border-rose-500/30">
+    <form action={action} className="space-y-3 rounded-xl border border-rose-200 p-3 dark:border-rose-500/30">
       <input type="hidden" name="reference" value={reference} />
       <p className="text-sm">{feeNote}</p>
       <label className="block text-sm font-medium">
         Reason (optional)
-        <input name="reason" maxLength={300} className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950" />
+        <input name="reason" maxLength={300} className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950" />
       </label>
       <div className="flex gap-2">
-        <button disabled={pending} className="min-h-11 flex-1 rounded-lg bg-rose-600 px-4 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-60">
+        <button disabled={pending} className="min-h-11 flex-1 rounded-xl bg-rose-600 px-4 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-60">
           {pending ? "Cancelling…" : "Yes, cancel"}
         </button>
-        <button type="button" onClick={() => setOpen(false)} className="min-h-11 rounded-lg px-4 text-sm ring-1 ring-inset ring-zinc-300 dark:ring-zinc-700">
+        <button type="button" onClick={() => setOpen(false)} className="min-h-11 rounded-xl px-4 text-sm ring-1 ring-inset ring-zinc-300 dark:ring-zinc-700">
           Keep it
         </button>
       </div>

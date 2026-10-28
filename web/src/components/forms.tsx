@@ -1,20 +1,21 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { ui } from "@/lib/ui";
 
-export const inputCls =
-  "mt-1 block w-full min-h-11 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-energy-600 focus:outline-none focus:ring-2 focus:ring-energy-600/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100";
+/** For client components; server components should import `ui.input` from "@/lib/ui". */
+export const inputCls = ui.input;
 
 export function FormMessage({ state }: { state: { error?: string; ok?: string } | null }) {
   if (state?.error)
     return (
-      <p role="alert" className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">
+      <p role="alert" className={ui.error}>
         {state.error}
       </p>
     );
   if (state?.ok)
     return (
-      <p role="status" className="rounded-md bg-energy-50 px-3 py-2 text-sm text-energy-800 dark:bg-energy-500/10 dark:text-energy-300">
+      <p role="status" className={ui.ok}>
         {state.ok}
       </p>
     );
@@ -36,9 +37,9 @@ export function SubmitButton({ pending, children, variant = "primary" }: { pendi
       ? "bg-rose-600 text-white hover:bg-rose-700"
       : variant === "secondary"
         ? "ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 dark:ring-zinc-700 dark:hover:bg-zinc-800"
-        : "bg-energy-600 text-white hover:bg-energy-700";
+        : "bg-energy-600 text-white shadow-sm hover:bg-energy-700";
   return (
-    <button disabled={pending} className={`min-h-11 rounded-lg px-5 text-sm font-medium disabled:opacity-60 ${cls}`}>
+    <button disabled={pending} className={`min-h-11 rounded-xl px-5 text-sm font-semibold transition disabled:opacity-60 ${cls}`}>
       {pending ? "Saving…" : children}
     </button>
   );

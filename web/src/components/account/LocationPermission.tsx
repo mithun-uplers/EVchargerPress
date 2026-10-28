@@ -29,11 +29,11 @@ export function LocationPermission() {
       {state === "granted" ? (
         <p role="status" className="text-sm font-medium text-energy-700 dark:text-energy-400">Location allowed — “Near me” will work on this device.</p>
       ) : (
-        <button type="button" onClick={ask} disabled={state === "asking"} className="min-h-11 rounded-lg px-4 text-sm font-medium ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 disabled:opacity-60 dark:ring-zinc-700 dark:hover:bg-zinc-800">
+        <button type="button" onClick={ask} disabled={state === "asking"} className="min-h-11 rounded-xl px-4 text-sm font-medium ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 disabled:opacity-60 dark:ring-zinc-700 dark:hover:bg-zinc-800">
           {state === "asking" ? "Waiting for your browser…" : "Allow location"}
         </button>
       )}
-      {msg && <p role="alert" className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:bg-amber-500/10 dark:text-amber-200">{msg}</p>}
+      {msg && <p role="alert" className="rounded-xl bg-charge-50 px-3 py-2 text-xs text-zinc-800 dark:bg-charge-500/10 dark:text-charge-200">{msg}</p>}
     </div>
   );
 }

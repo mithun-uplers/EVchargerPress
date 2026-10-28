@@ -47,7 +47,7 @@ export function NearMeButton() {
         type="button"
         onClick={go}
         disabled={busy}
-        className={`rounded-lg px-3 py-2 text-sm font-medium ring-1 ring-inset transition ${
+        className={`inline-flex min-h-10 items-center rounded-xl px-3 text-sm font-medium shadow-sm ring-1 ring-inset transition ${
           active
             ? "bg-energy-600 text-white ring-energy-600"
             : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-200 dark:ring-zinc-700"
@@ -56,7 +56,7 @@ export function NearMeButton() {
         {busy ? "Locating…" : active ? "Nearest first ✕" : "Near me"}
       </button>
       {err && (
-        <p role="alert" className="max-w-sm rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:bg-amber-500/10 dark:text-amber-200">
+        <p role="alert" className="max-w-sm rounded-xl bg-charge-50 px-3 py-2 text-xs text-zinc-800 dark:bg-charge-500/10 dark:text-charge-200">
           {err}
         </p>
       )}

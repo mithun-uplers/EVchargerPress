@@ -8,7 +8,9 @@ import { VehicleDashboard } from "@/components/charging/VehicleDashboard";
 import { BatteryReadingForm } from "@/components/vehicles/VehicleExtras";
 import { averagePricePerKwhMinor, buildHistory, normalisePeriod, periodKeys, type HistoryMetric, type HistoryView as View } from "@/lib/charging-stats";
 import { PREVIEW_NOW, previewItems, previewLatest, previewReadings, previewUpcoming, previewVehicles } from "@/lib/preview-data";
-import { previewEvses, previewLive, previewRecs, previewRoute } from "@/lib/preview-data-smart";
+import { previewBookings, previewEvses, previewLive, previewRecs, previewRoute, previewStation, previewStations } from "@/lib/preview-data-smart";
+import { BookingCard } from "@/components/booking/BookingCard";
+import { HomeHero, StationCard, StationHero } from "@/components/stations/StationBlocks";
 import { AnalyticsView } from "@/components/charging/AnalyticsView";
 import { EvseLivePanel } from "@/components/live/EvseLivePanel";
 import { LiveCharging } from "@/components/live/LiveCharging";
@@ -19,7 +21,7 @@ import { chargingAnalytics } from "@/lib/analytics";
 
 export const metadata: Metadata = { title: "Design preview", robots: { index: false, follow: false } };
 
-const SCREENS = ["history", "vehicle", "vehicles", "live", "station", "route", "analytics", "home"] as const;
+const SCREENS = ["home", "station", "bookings", "live", "route", "history", "analytics", "vehicle", "vehicles"] as const;
 const TZ = "Asia/Kolkata";
 
 function Banner() {
@@ -59,6 +61,26 @@ export default async function PreviewPage({ params, searchParams }: PageProps<"/
     );
   }
 
+  if (screen === "bookings") {
+    return (
+      <div className="mx-auto max-w-3xl space-y-5">
+        <Banner />
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">My bookings</h1>
+            <p className="mt-1 text-sm text-zinc-500">Times are shown in each station’s local time.</p>
+          </div>
+        </div>
+        <nav className="-mx-1 flex gap-1 overflow-x-auto rounded-2xl bg-white p-1 shadow-sm ring-1 ring-zinc-200/70">
+          {["Upcoming", "Completed", "Cancelled", "Expired", "No-show"].map((t, i) => (
+            <span key={t} className={`shrink-0 rounded-xl px-4 py-2 text-sm font-medium ${i === 0 ? "bg-energy-600 text-white shadow-sm" : "text-zinc-500"}`}>{t}</span>
+          ))}
+        </nav>
+        <ul className="space-y-3">{previewBookings.map((b) => <li key={b.id}><BookingCard b={b} now={PREVIEW_NOW} /></li>)}</ul>
+      </div>
+    );
+  }
+
   if (screen === "live") {
     return (
       <div className="mx-auto max-w-3xl space-y-5">
@@ -74,10 +96,17 @@ export default async function PreviewPage({ params, searchParams }: PageProps<"/
 
   if (screen === "station") {
     return (
-      <div className="mx-auto max-w-xl space-y-5">
+      <div className="space-y-6">
         <Banner />
-        <h1 className="text-2xl font-semibold tracking-tight">Demo Hub — Ahmedabad</h1>
-        <EvseLivePanel stationId="preview" initial={previewEvses} demoNow={PREVIEW_NOW.getTime()} />
+        <StationHero station={previewStation} canBook />
+        <div className="grid gap-6 lg:grid-cols-5">
+          <div className="space-y-6 lg:col-span-3">
+            <div className="grid h-64 place-items-center rounded-2xl bg-energy-50 text-sm text-energy-800 ring-1 ring-energy-200">Map (OpenStreetMap) appears here</div>
+          </div>
+          <div className="space-y-4 lg:col-span-2">
+            <EvseLivePanel stationId="preview" initial={previewEvses} demoNow={PREVIEW_NOW.getTime()} />
+          </div>
+        </div>
       </div>
     );
   }
@@ -102,6 +131,7 @@ export default async function PreviewPage({ params, searchParams }: PageProps<"/
     return (
       <div className="space-y-6">
         <Banner />
+        <HomeHero name="Mithun" q="" connector="" bookableOnly={false} workingOnly={false} loc={{ lat: 23.03, lng: 72.56 }} mapHref="/map" />
         <div className="flex items-center justify-between gap-3 rounded-2xl bg-gradient-to-r from-energy-800 to-energy-600 p-4 text-white shadow-md">
           <span className="flex items-center gap-3">
             <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-charge-400 motion-safe:animate-pulse" />
@@ -113,6 +143,10 @@ export default async function PreviewPage({ params, searchParams }: PageProps<"/
           <span aria-hidden="true" className="text-xl">→</span>
         </div>
         <Recommendations items={previewRecs} vehicleLabel="Daily driver" located />
+        <p className="pt-2 text-sm text-zinc-500">4 stations within 25 km, nearest first</p>
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {previewStations.map((st) => <li key={st.id}><StationCard s={st} /></li>)}
+        </ul>
       </div>
     );
   }

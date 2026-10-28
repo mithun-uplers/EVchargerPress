@@ -8,6 +8,7 @@ import { effectiveStatus, parseRange, STATUS_LABEL, type BookingStatus } from "@
 import { formatLocal, formatMoney, formatTime, zoneLabel } from "@/lib/format";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { chargingWindow } from "@/lib/charging-window";
+import { ui } from "@/lib/ui";
 import { getBooking } from "@/server/bookings";
 
 export const metadata: Metadata = { title: "Booking" };
@@ -45,35 +46,45 @@ export default async function BookingPage({ params }: PageProps<"/bookings/[ref]
     <div className="mx-auto max-w-3xl space-y-6">
       <Link href="/bookings" className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white">← My bookings</Link>
 
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="font-mono text-sm text-zinc-500">{b.reference}</p>
-          <h1 className="text-2xl font-semibold tracking-tight">{b.station?.name ?? "Charging station"}</h1>
-          <p className="mt-1 text-zinc-600 dark:text-zinc-300">
-            {formatLocal(start, tz, { weekday: "long", day: "numeric", month: "long" })}, {formatTime(start, tz)}–{formatTime(end, tz)}{" "}
-            <span className="text-zinc-500">({zoneLabel(tz, start)})</span>
-          </p>
-          <p className="text-sm text-zinc-500">
-            {b.evse?.label}{b.evse?.max_power_kw ? ` · ${Number(b.evse.max_power_kw)} kW` : ""}
-            {b.price_snapshot.vehicle ? ` · ${b.price_snapshot.vehicle.label}` : ""}
-          </p>
+      <section className={ui.hero}>
+        <svg aria-hidden="true" viewBox="0 0 200 200" className="pointer-events-none absolute -right-10 -top-10 h-52 w-52 text-white/10">
+          <path d="M115 10 45 115h50l-10 75 70-105h-50l10-75Z" fill="currentColor" />
+        </svg>
+        <div className="relative flex flex-wrap items-start justify-between gap-3">
+          <p className="font-mono text-sm text-white/75">{b.reference}</p>
+          <span className="rounded-full bg-white p-0.5"><BookingStatusBadge status={status} /></span>
         </div>
-        <BookingStatusBadge status={status} />
-      </div>
+        <h1 className="relative mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">{b.station?.name ?? "Charging station"}</h1>
+        <div className="relative mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <div className="rounded-xl bg-white/10 p-3 ring-1 ring-inset ring-white/15">
+            <p className="text-xs text-white/70">{formatLocal(start, tz, { weekday: "long" })}</p>
+            <p className="font-semibold">{formatLocal(start, tz, { day: "numeric", month: "long" })}</p>
+          </div>
+          <div className="rounded-xl bg-white/10 p-3 ring-1 ring-inset ring-white/15">
+            <p className="text-xs text-white/70">Time ({zoneLabel(tz, start)})</p>
+            <p className="font-semibold tabular-nums">{formatTime(start, tz)}–{formatTime(end, tz)}</p>
+          </div>
+          <div className="col-span-2 rounded-xl bg-white/10 p-3 ring-1 ring-inset ring-white/15 sm:col-span-1">
+            <p className="text-xs text-white/70">Charger</p>
+            <p className="truncate font-semibold">{b.evse?.label}{b.evse?.max_power_kw ? ` · ${Number(b.evse.max_power_kw)} kW` : ""}</p>
+          </div>
+        </div>
+        {b.price_snapshot.vehicle && <p className="relative mt-3 text-sm text-white/80">Vehicle: {b.price_snapshot.vehicle.label}</p>}
+      </section>
 
       {status === "pending" && b.hold_expires_at && (
-        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+        <div className="rounded-2xl border border-charge-300 bg-charge-50 p-4 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
           This slot is held for you for <strong><HoldCountdown expiresAt={b.hold_expires_at} /></strong>. Review the price and rules, then confirm.
         </div>
       )}
       {status === "expired" && (
-        <div className="rounded-xl border border-zinc-300 bg-zinc-50 p-4 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+        <div className="rounded-2xl border border-zinc-300 bg-white p-4 text-sm dark:border-zinc-700 dark:bg-zinc-900">
           This hold expired before it was confirmed, so the slot was released.{" "}
           {b.station && <Link href={`/stations/${b.station.id}/book`} className="font-medium text-energy-700 hover:underline">Choose a new slot</Link>}
         </div>
       )}
       {status === "cancelled" && (
-        <div className="rounded-xl border border-zinc-300 bg-zinc-50 p-4 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+        <div className="rounded-2xl border border-zinc-300 bg-white p-4 text-sm dark:border-zinc-700 dark:bg-zinc-900">
           Cancelled {b.cancelled_at ? formatLocal(b.cancelled_at, tz) : ""}.{" "}
           {b.cancellation_fee_minor ? `Late-cancellation fee: ${formatMoney(b.cancellation_fee_minor, b.currency)}.` : "No fee."}
         </div>
@@ -82,11 +93,11 @@ export default async function BookingPage({ params }: PageProps<"/bookings/[ref]
       {showLive && (
         <Link
           href={`/bookings/${b.reference}/live`}
-          className="flex items-center justify-between gap-3 rounded-2xl bg-gradient-to-br from-energy-700 via-energy-600 to-energy-800 p-4 text-white shadow-md hover:from-energy-800"
+          className="flex items-center justify-between gap-3 rounded-2xl bg-charge-400 p-4 text-zinc-900 shadow-md transition hover:bg-charge-300"
         >
           <span>
             <span className="block font-semibold">{status === "completed" ? "Charging summary" : charging.canStart ? "Start charging from your phone" : "Live charging"}</span>
-            <span className="block text-sm text-white/80">
+            <span className="block text-sm text-zinc-800">
               {status === "completed" ? "Energy, power curve and cost reported by the charger." : "See live power, energy, battery % and cost so far."}
             </span>
           </span>
@@ -95,14 +106,14 @@ export default async function BookingPage({ params }: PageProps<"/bookings/[ref]
       )}
 
       <div className="grid gap-6 md:grid-cols-5">
-        <section className="rounded-xl border border-zinc-200 bg-white p-4 md:col-span-3 dark:border-zinc-800 dark:bg-zinc-900">
-          <h2 className="mb-3 font-medium">Price (frozen when you booked)</h2>
+        <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-zinc-200/70 sm:p-5 md:col-span-3 dark:bg-zinc-900 dark:ring-zinc-800">
+          <h2 className="mb-3 font-semibold">Price <span className="font-normal text-zinc-500">· frozen when you booked</span></h2>
           <PriceBreakdown snap={b.price_snapshot} />
         </section>
 
         <div className="space-y-4 md:col-span-2">
           {(status === "pending" || canCheckIn || canCancel) && (
-            <section className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+            <section className="space-y-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-zinc-200/70 dark:bg-zinc-900 dark:ring-zinc-800">
               {status === "pending" && <ConfirmButton reference={b.reference} />}
               {canCheckIn && <CheckInButton reference={b.reference} />}
               {status === "confirmed" && !canCheckIn && now < checkInOpens && (
@@ -113,8 +124,8 @@ export default async function BookingPage({ params }: PageProps<"/bookings/[ref]
           )}
 
           {policy && (
-            <section className="rounded-xl border border-zinc-200 bg-white p-4 text-sm dark:border-zinc-800 dark:bg-zinc-900">
-              <h2 className="font-medium">Rules for this booking</h2>
+            <section className="rounded-2xl bg-white p-4 text-sm shadow-sm ring-1 ring-zinc-200/70 dark:bg-zinc-900 dark:ring-zinc-800">
+              <h2 className="font-semibold">Rules for this booking</h2>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-zinc-600 dark:text-zinc-300">
                 <li>Free cancellation until {policy.free_cancel_until_min} min before the start; later, the reservation fee is charged.</li>
                 <li>No cancellations after the start time.</li>
@@ -124,8 +135,8 @@ export default async function BookingPage({ params }: PageProps<"/bookings/[ref]
             </section>
           )}
 
-          <section className="rounded-xl border border-zinc-200 bg-white p-4 text-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <h2 className="font-medium">History</h2>
+          <section className="rounded-2xl bg-white p-4 text-sm shadow-sm ring-1 ring-zinc-200/70 dark:bg-zinc-900 dark:ring-zinc-800">
+            <h2 className="font-semibold">History</h2>
             <ol className="mt-2 space-y-2">
               {events.map((e) => (
                 <li key={e.id} className="flex justify-between gap-3">

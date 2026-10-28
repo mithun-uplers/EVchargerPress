@@ -39,7 +39,7 @@ export function VehicleForm({ vehicle, back }: { vehicle?: Vehicle; back?: strin
       {vehicle && <input type="hidden" name="id" value={vehicle.id} />}
       {back && <input type="hidden" name="back" value={back} />}
 
-      <fieldset className="grid gap-4 rounded-xl border border-zinc-200 bg-white p-4 sm:grid-cols-2 dark:border-zinc-800 dark:bg-zinc-900">
+      <fieldset className="grid gap-4 rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200/70 p-4 sm:grid-cols-2 dark:bg-zinc-900 dark:ring-zinc-800">
         <legend className="px-1 text-sm font-medium">Vehicle</legend>
         <label className="text-sm font-medium sm:col-span-2">
           Type
@@ -71,7 +71,7 @@ export function VehicleForm({ vehicle, back }: { vehicle?: Vehicle; back?: strin
         </label>
       </fieldset>
 
-      <fieldset className="grid gap-4 rounded-xl border border-zinc-200 bg-white p-4 sm:grid-cols-3 dark:border-zinc-800 dark:bg-zinc-900">
+      <fieldset className="grid gap-4 rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200/70 p-4 sm:grid-cols-3 dark:bg-zinc-900 dark:ring-zinc-800">
         <legend className="px-1 text-sm font-medium">Battery and charging</legend>
         <p className="text-xs text-zinc-500 sm:col-span-3">Leave blank if you don’t know — we never guess specs. They improve price and time estimates.</p>
         <label className="text-sm font-medium">
@@ -88,7 +88,7 @@ export function VehicleForm({ vehicle, back }: { vehicle?: Vehicle; back?: strin
         </label>
       </fieldset>
 
-      <fieldset className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+      <fieldset className="rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200/70 p-4 dark:bg-zinc-900 dark:ring-zinc-800">
         <legend className="px-1 text-sm font-medium">Connectors your vehicle can use</legend>
         <p className="text-xs text-zinc-500">Pick every plug your vehicle accepts (directly or with the cable you carry). Bookings only show chargers that match.</p>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
