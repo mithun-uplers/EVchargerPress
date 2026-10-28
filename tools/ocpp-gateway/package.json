@@ -1,0 +1,14 @@
+{
+  "name": "evcp-ocpp-gateway",
+  "private": true,
+  "type": "module",
+  "description": "OCPP 1.6J WebSocket gateway and charger simulator for EVChargePress",
+  "scripts": {
+    "gateway": "node gateway.mjs",
+    "charger": "node simulate-charger.mjs"
+  },
+  "dependencies": {
+    "ws": "8.18.3"
+  },
+  "engines": { "node": ">=20" }
+}

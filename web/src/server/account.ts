@@ -44,9 +44,13 @@ export type Session = {
   source: "manual" | "operator_api" | "charger_ocpp";
   status: string;
   notes: string | null;
+  is_simulated: boolean;
+  last_soc_percent: number | null;
+  last_meter_at: string | null;
   booking: { id: string; reference: string } | null;
   vehicle: { id: string; make: string; model: string; nickname: string | null } | null;
   station: { name: string; time_zone: string; address: string | null; city: string | null; operator: string | null } | null;
+  evse: { max_power_kw: number | null } | null;
 };
 
 const VEHICLE_COLUMNS =
@@ -92,7 +96,7 @@ export async function listSessions(limit = 100): Promise<Session[]> {
   const { data } = await supabase
     .from("charging_sessions")
     .select(
-      "id,started_at,ended_at,energy_kwh,total_cost_minor,currency,source,status,notes,booking:bookings(id,reference),vehicle:vehicles(id,make,model,nickname),station:stations(name,time_zone,address,city,operator)",
+      "id,started_at,ended_at,energy_kwh,total_cost_minor,currency,source,status,notes,is_simulated,last_soc_percent,last_meter_at,booking:bookings(id,reference),vehicle:vehicles(id,make,model,nickname),station:stations(name,time_zone,address,city,operator),evse:evses(max_power_kw)",
     )
     .order("started_at", { ascending: false })
     .limit(limit);

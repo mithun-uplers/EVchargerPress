@@ -63,6 +63,12 @@ function popupContent(p: Record<string, unknown>) {
   badge.className = Number(p.bookable) === 1 ? "mt-1 text-xs font-semibold text-energy-700" : "mt-1 text-xs text-zinc-500";
   badge.textContent = Number(p.bookable) === 1 ? "Online booking available" : "Information only — no online booking";
   root.appendChild(badge);
+  if (Number(p.live_total) > 0) {
+    const live = document.createElement("p");
+    live.className = "mt-1 text-xs font-medium text-energy-800";
+    live.textContent = `${Number(p.live_free)} of ${Number(p.live_total)} free · ${Number(p.live_sim) === 1 ? "Simulated" : "Live"}`;
+    root.appendChild(live);
+  }
   if (p.source === "openstreetmap") {
     const src = document.createElement("p");
     src.className = "mt-1 text-[11px] text-zinc-500";

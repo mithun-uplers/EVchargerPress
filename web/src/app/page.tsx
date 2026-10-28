@@ -2,6 +2,10 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { NearMeButton } from "@/components/NearMeButton";
 import { StatusBadge } from "@/components/StatusBadge";
+import { StationLiveBadge } from "@/components/live/LiveBadge";
+import { Recommendations } from "@/components/live/Recommendations";
+import { activeSession } from "@/server/live";
+import { recommendationsFor } from "@/server/recommend";
 import { timeAgo } from "@/lib/geo";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import { getProfile } from "@/server/account";
@@ -53,7 +57,8 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     supabase.from("station_summaries").select("id", { count: "exact", head: true }).eq("is_bookable", true),
     getCurrentUser(),
   ]);
-  const profile = user ? await getProfile(user.id) : null;
+  const [profile, charging] = user ? await Promise.all([getProfile(user.id), activeSession()]) : [null, null];
+  const recs = user && !q && !bookableOnly ? await recommendationsFor(profile, hasLoc ? { lat, lng } : null) : null;
 
   let stations = ((data ?? []) as StationSummary[]).map((s) => ({ ...s, distance: distances.get(s.id) ?? null }));
   if (hasLoc) stations = stations.sort((a, b) => (a.distance ?? 1e9) - (b.distance ?? 1e9));
@@ -106,12 +111,35 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         </form>
       </section>
 
+      {charging?.booking && (
+        <Link
+          href={`/bookings/${charging.booking.reference}/live`}
+          className="flex items-center justify-between gap-3 rounded-2xl bg-gradient-to-r from-energy-800 to-energy-600 p-4 text-white shadow-md"
+        >
+          <span className="flex items-center gap-3">
+            <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-charge-400 motion-safe:animate-pulse" />
+            <span>
+              <span className="block font-semibold">Charging at {charging.station?.name ?? "your station"}</span>
+              <span className="block text-sm text-white/80">
+                {charging.energy_kwh !== null ? `${Number(charging.energy_kwh).toFixed(1)} kWh` : ""}
+                {charging.last_power_kw !== null ? ` · ${Number(charging.last_power_kw).toFixed(0)} kW` : ""}
+                {charging.last_soc_percent !== null ? ` · ${Math.round(Number(charging.last_soc_percent))}%` : ""}
+                {charging.is_simulated ? " · Simulated" : " · Live"}
+              </span>
+            </span>
+          </span>
+          <span aria-hidden="true" className="text-xl">→</span>
+        </Link>
+      )}
+
       {user && profile && !profile.onboarded_at && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-energy-200 bg-energy-50 p-4 text-sm dark:border-energy-500/30 dark:bg-energy-500/10">
           <span>Finish setting up: add your vehicle so we only show chargers it can use.</span>
           <Link href="/onboarding" className="inline-flex min-h-10 items-center rounded-lg bg-energy-600 px-3 font-medium text-white hover:bg-energy-700">Continue setup</Link>
         </div>
       )}
+
+      {recs && <Recommendations items={recs.items} vehicleLabel={recs.vehicleLabel} located={hasLoc} />}
 
       {!bookableOnly && (bookableCount ?? 0) > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-white p-4 text-sm dark:border-zinc-800 dark:bg-zinc-900">
@@ -174,6 +202,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                       <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">Info only</span>
                     )}
                     <StatusBadge status={s.last_status} />
+                    <StationLiveBadge s={s} />
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-1.5">

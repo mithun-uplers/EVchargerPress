@@ -7,6 +7,7 @@ import { PriceBreakdown } from "@/components/booking/PriceBreakdown";
 import { effectiveStatus, parseRange, STATUS_LABEL, type BookingStatus } from "@/lib/booking-types";
 import { formatLocal, formatMoney, formatTime, zoneLabel } from "@/lib/format";
 import { getCurrentUser } from "@/lib/supabase/server";
+import { chargingWindow } from "@/lib/charging-window";
 import { getBooking } from "@/server/bookings";
 
 export const metadata: Metadata = { title: "Booking" };
@@ -37,6 +38,8 @@ export default async function BookingPage({ params }: PageProps<"/bookings/[ref]
   const checkInOpens = new Date(start.getTime() - (policy?.check_in_early_min ?? 15) * 60_000);
   const checkInCloses = new Date(start.getTime() + (policy?.no_show_grace_min ?? 15) * 60_000);
   const canCheckIn = status === "confirmed" && now >= checkInOpens && now <= checkInCloses;
+  const charging = chargingWindow(b, now);
+  const showLive = charging.connected && (charging.canStart || status === "checked_in" || status === "completed");
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -74,6 +77,21 @@ export default async function BookingPage({ params }: PageProps<"/bookings/[ref]
           Cancelled {b.cancelled_at ? formatLocal(b.cancelled_at, tz) : ""}.{" "}
           {b.cancellation_fee_minor ? `Late-cancellation fee: ${formatMoney(b.cancellation_fee_minor, b.currency)}.` : "No fee."}
         </div>
+      )}
+
+      {showLive && (
+        <Link
+          href={`/bookings/${b.reference}/live`}
+          className="flex items-center justify-between gap-3 rounded-2xl bg-gradient-to-br from-energy-700 via-energy-600 to-energy-800 p-4 text-white shadow-md hover:from-energy-800"
+        >
+          <span>
+            <span className="block font-semibold">{status === "completed" ? "Charging summary" : charging.canStart ? "Start charging from your phone" : "Live charging"}</span>
+            <span className="block text-sm text-white/80">
+              {status === "completed" ? "Energy, power curve and cost reported by the charger." : "See live power, energy, battery % and cost so far."}
+            </span>
+          </span>
+          <span aria-hidden="true" className="text-2xl">→</span>
+        </Link>
       )}
 
       <div className="grid gap-6 md:grid-cols-5">

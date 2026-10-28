@@ -41,6 +41,11 @@ export type StationSummary = {
   last_checkin_at: string | null;
   max_power_kw: number | null;
   connector_types: string[];
+  // Live status from a connected charger (null when nothing fresh was reported in the last 15 minutes).
+  live_evse_count?: number | null;
+  live_available_count?: number | null;
+  live_is_simulated?: boolean | null;
+  live_updated_at?: string | null;
 };
 
 export type Connector = {

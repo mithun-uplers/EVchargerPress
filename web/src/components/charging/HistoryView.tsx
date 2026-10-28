@@ -87,7 +87,9 @@ export function SessionCard({ item }: { item: HistoryItem }) {
         </div>
         {item.subtitle && <p className="truncate text-sm text-zinc-500">{item.subtitle}</p>}
         <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px]">
+          {item.live && <span className="inline-flex items-center gap-1 rounded bg-charge-400 px-1.5 py-0.5 font-semibold text-zinc-900"><span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-zinc-900 motion-safe:animate-pulse" />Charging now</span>}
           <span className={`rounded px-1.5 py-0.5 font-medium ${badge.cls}`}>{badge.label}</span>
+          {item.isSimulated && <span className="rounded bg-charge-50 px-1.5 py-0.5 font-medium text-charge-600 ring-1 ring-inset ring-charge-200">Simulated</span>}
           {mins !== null && <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">{est ? "Booked " : ""}{formatDuration(mins)}</span>}
           {item.vehicleLabel && <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">{item.vehicleLabel}</span>}
           {item.reference && <span className="font-mono text-zinc-400">{item.reference}</span>}
@@ -227,11 +229,14 @@ export function HistoryView({
           <h1 className="text-2xl font-semibold tracking-tight">Charging history</h1>
           <p className="mt-1 text-sm text-zinc-500">Recorded sessions, spending and trends. Estimates are marked “~”.</p>
         </div>
+        <div className="flex flex-wrap gap-2">
+        <Link href="/analytics" className="inline-flex min-h-11 items-center rounded-xl bg-white px-4 text-sm font-medium shadow-sm ring-1 ring-inset ring-zinc-200 hover:bg-energy-50 dark:bg-zinc-900 dark:ring-zinc-700">Analytics</Link>
         {addSession && (
           <a href="#add-session" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-energy-600 px-4 text-sm font-medium text-white shadow-sm hover:bg-energy-700">
             <BoltIcon className="h-4 w-4" /> Add session
           </a>
         )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">

@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BoltIcon, CalendarIcon, CarIcon, HomeIcon, MapIcon, PlusIcon, UserIcon } from "./icons";
+import { BoltIcon, CalendarIcon, CarIcon, ChartIcon, HomeIcon, MapIcon, PlusIcon, RouteIcon, UserIcon } from "./icons";
 
 const ITEMS = [
   { href: "/", label: "Home", icon: HomeIcon, match: (p: string) => p === "/" || p.startsWith("/stations") },
   { href: "/map", label: "Map", icon: MapIcon, match: (p: string) => p.startsWith("/map"), desktopOnly: true },
   { href: "/bookings", label: "Bookings", icon: CalendarIcon, match: (p: string) => p.startsWith("/bookings") },
   { href: "/vehicles", label: "Vehicles", icon: CarIcon, match: (p: string) => p.startsWith("/vehicles") },
-  { href: "/history", label: "History", icon: BoltIcon, match: (p: string) => p.startsWith("/history") },
+  { href: "/route", label: "Plan trip", icon: RouteIcon, match: (p: string) => p.startsWith("/route"), desktopOnly: true },
+  { href: "/history", label: "History", icon: BoltIcon, match: (p: string) => p.startsWith("/history") || p.startsWith("/analytics") },
+  { href: "/analytics", label: "Analytics", icon: ChartIcon, match: (p: string) => p.startsWith("/analytics"), desktopOnly: true },
   { href: "/profile", label: "Profile", icon: UserIcon, match: (p: string) => p.startsWith("/profile") || p.startsWith("/onboarding") },
 ];
 
@@ -19,7 +21,7 @@ export function SidebarNav() {
   return (
     <nav aria-label="Main" className="flex flex-col gap-1">
       {ITEMS.map(({ href, label, icon: Icon, match }) => {
-        const active = match(path);
+        const active = match(path) && !(href === "/history" && path.startsWith("/analytics"));
         return (
           <Link
             key={href}

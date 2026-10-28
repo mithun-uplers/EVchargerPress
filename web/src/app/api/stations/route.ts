@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient();
   let query = supabase
     .from("station_summaries")
-    .select("id,name,lat,lng,address,city,city_is_approx,last_status,max_power_kw,connector_types,data_source,is_bookable")
+    .select("id,name,lat,lng,address,city,city_is_approx,last_status,max_power_kw,connector_types,data_source,is_bookable,live_evse_count,live_available_count,live_is_simulated")
     .gte("lat", Math.max(-90, south))
     .lte("lat", Math.min(90, north))
     .gte("lng", Math.max(-180, west))
@@ -41,11 +41,14 @@ export async function GET(request: NextRequest) {
       connectors: (s.connector_types ?? []).join(", "),
       source: s.data_source,
       bookable: s.is_bookable ? 1 : 0,
+      live_total: s.live_evse_count ?? 0,
+      live_free: s.live_available_count ?? 0,
+      live_sim: s.live_is_simulated ? 1 : 0,
     },
   }));
 
   return NextResponse.json(
     { type: "FeatureCollection", features },
-    { headers: { "Cache-Control": "public, max-age=30, s-maxage=60" } },
+    { headers: { "Cache-Control": "public, max-age=15, s-maxage=15" } },
   );
 }

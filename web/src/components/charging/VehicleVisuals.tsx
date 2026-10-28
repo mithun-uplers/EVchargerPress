@@ -48,12 +48,14 @@ export function VehicleArt({ type, className = "h-24 w-auto" }: { type: VehicleT
 export function BatteryBar({
   percent,
   recordedAt,
+  sourceLabel = "Manual",
   timeZone,
   tone = "light",
   size = "md",
 }: {
   percent: number | null;
   recordedAt?: string | null;
+  sourceLabel?: string;
   timeZone: string;
   tone?: "light" | "dark";
   size?: "sm" | "md";
@@ -68,12 +70,12 @@ export function BatteryBar({
       <div className="flex items-baseline justify-between gap-2">
         <span className={`${size === "md" ? "text-3xl" : "text-lg"} font-semibold tabular-nums`}>{known ? `${Math.round(p)}%` : "—"}</span>
         <span className={`text-[11px] ${sub}`}>
-          {known && recordedAt ? `Manual · as of ${formatLocal(recordedAt, timeZone, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })}` : "No battery reading yet"}
+          {known && recordedAt ? `${sourceLabel} · as of ${formatLocal(recordedAt, timeZone, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })}` : "No battery reading yet"}
         </span>
       </div>
       <div
         role="meter"
-        aria-label="Battery level from your last manual reading"
+        aria-label={`Battery level (${sourceLabel.toLowerCase()} reading)`}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={known ? Math.round(p) : undefined}

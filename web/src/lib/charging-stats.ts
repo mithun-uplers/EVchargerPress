@@ -23,6 +23,9 @@ export type HistoryItem = {
   reference?: string | null;
   vehicleId?: string | null;
   vehicleLabel?: string | null;
+  isSimulated?: boolean;
+  live?: boolean; // still charging
+  chargerKw?: number | null; // charging point's max power, when known
   href?: string | null;
 };
 
@@ -176,9 +179,12 @@ export type SessionInput = {
   total_cost_minor: number | null;
   currency: string;
   source: "manual" | "operator_api" | "charger_ocpp";
+  status?: string;
+  is_simulated?: boolean;
   booking: { id?: string; reference: string } | null;
   vehicle: { id?: string; make: string; model: string; nickname: string | null } | null;
   station: { name: string; time_zone: string; address?: string | null; city?: string | null; operator?: string | null } | null;
+  evse?: { max_power_kw: number | string | null } | null;
 };
 
 export type FinishedBookingInput = {
@@ -219,7 +225,10 @@ export function toHistoryItems(sessions: SessionInput[], finished: FinishedBooki
     reference: s.booking?.reference ?? null,
     vehicleId: s.vehicle?.id ?? null,
     vehicleLabel: vLabel(s.vehicle),
-    href: s.booking ? `/bookings/${s.booking.reference}` : null,
+    isSimulated: !!s.is_simulated,
+    chargerKw: s.evse?.max_power_kw ? Number(s.evse.max_power_kw) : null,
+    live: s.status === "in_progress",
+    href: s.booking ? (s.source === "manual" ? `/bookings/${s.booking.reference}` : `/bookings/${s.booking.reference}/live`) : null,
   }));
   const fromBookings: HistoryItem[] = finished
     .filter((b) => !covered.has(b.reference))

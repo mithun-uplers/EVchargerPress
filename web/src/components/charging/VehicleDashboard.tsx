@@ -38,6 +38,7 @@ export function VehicleDashboard({
   readingForm,
   removeSlot,
   details,
+  chargerReading = null,
 }: {
   vehicle: Vehicle;
   readings: BatteryReading[];
@@ -52,8 +53,13 @@ export function VehicleDashboard({
   readingForm?: ReactNode;
   removeSlot?: ReactNode;
   details?: ReactNode;
+  chargerReading?: { soc_percent: number; recorded_at: string; simulated: boolean } | null;
 }) {
-  const latestSoc = readings.find((r) => r.soc_percent !== null) ?? null;
+  const manualSoc = readings.find((r) => r.soc_percent !== null) ?? null;
+  // Battery % reported by a connected charger during a session counts as telemetry (labelled with its source).
+  const chargerSoc = chargerReading && (!manualSoc || Date.parse(chargerReading.recorded_at) > Date.parse(manualSoc.recorded_at)) ? chargerReading : null;
+  const latestSoc = chargerSoc ? { soc_percent: chargerSoc.soc_percent, recorded_at: chargerSoc.recorded_at } : manualSoc;
+  const socLabel = chargerSoc ? (chargerSoc.simulated ? "Simulated charger" : "From charger") : "Manual";
   const latestOdo = readings.find((r) => r.odometer_km !== null) ?? null;
   const battery = vehicle.battery_capacity_kwh !== null ? Number(vehicle.battery_capacity_kwh) : null;
   const powerKw = vehicle.max_dc_kw ? Number(vehicle.max_dc_kw) : vehicle.max_ac_kw ? Number(vehicle.max_ac_kw) : null;
@@ -83,7 +89,7 @@ export function VehicleDashboard({
         </div>
         <div className="relative mt-4 grid items-end gap-5 sm:grid-cols-[1fr_auto]">
           <div className="space-y-4">
-            <BatteryBar percent={latestSoc ? Number(latestSoc.soc_percent) : null} recordedAt={latestSoc?.recorded_at} timeZone={timeZone} tone="dark" />
+            <BatteryBar percent={latestSoc ? Number(latestSoc.soc_percent) : null} recordedAt={latestSoc?.recorded_at} timeZone={timeZone} tone="dark" sourceLabel={socLabel} />
             <div className="flex flex-wrap gap-1.5">
               {vehicle.vehicle_connectors.map((c) => (
                 <span key={c.connector_type} className="rounded-full bg-white/15 px-2.5 py-1 text-xs font-medium ring-1 ring-inset ring-white/20">
@@ -114,7 +120,7 @@ export function VehicleDashboard({
                   <Stat tone="charge" label="Cost" value={est.costMinor !== null ? `~${formatMoney(est.costMinor, "INR").replace(/\.00$/, "")}` : "—"} note={pricePerKwhMinor !== null ? `${formatMoney(pricePerKwhMinor, "INR")}/kWh` : "no price history"} />
                 </dl>
                 <p className="mt-3 text-xs text-zinc-500">
-                  From your last manual reading ({Number(latestSoc!.soc_percent)}%) and battery size. Time assumes ~80% of max power on average.
+                  From your last {chargerSoc ? "charger-reported" : "manual"} reading ({Number(latestSoc!.soc_percent)}%) and battery size. Time assumes ~80% of max power on average.
                   {priceBasis ? ` Price: ${priceBasis}.` : " Add a session with cost and kWh to estimate cost."} Real charging varies with temperature, charger and battery state.
                 </p>
               </>

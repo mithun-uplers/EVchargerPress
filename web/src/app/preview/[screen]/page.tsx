@@ -8,17 +8,25 @@ import { VehicleDashboard } from "@/components/charging/VehicleDashboard";
 import { BatteryReadingForm } from "@/components/vehicles/VehicleExtras";
 import { averagePricePerKwhMinor, buildHistory, normalisePeriod, periodKeys, type HistoryMetric, type HistoryView as View } from "@/lib/charging-stats";
 import { PREVIEW_NOW, previewItems, previewLatest, previewReadings, previewUpcoming, previewVehicles } from "@/lib/preview-data";
+import { previewEvses, previewLive, previewRecs, previewRoute } from "@/lib/preview-data-smart";
+import { AnalyticsView } from "@/components/charging/AnalyticsView";
+import { EvseLivePanel } from "@/components/live/EvseLivePanel";
+import { LiveCharging } from "@/components/live/LiveCharging";
+import { Recommendations } from "@/components/live/Recommendations";
+import { RouteForm } from "@/components/route/RouteForm";
+import { RoutePlanView } from "@/components/route/RoutePlanView";
+import { chargingAnalytics } from "@/lib/analytics";
 
 export const metadata: Metadata = { title: "Design preview", robots: { index: false, follow: false } };
 
-const SCREENS = ["history", "vehicle", "vehicles"] as const;
+const SCREENS = ["history", "vehicle", "vehicles", "live", "station", "route", "analytics", "home"] as const;
 const TZ = "Asia/Kolkata";
 
 function Banner() {
   return (
     <div role="note" className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-charge-50 px-3 py-2 text-xs text-charge-600 ring-1 ring-inset ring-charge-200">
       <span><strong>Design preview · sample data.</strong> Fictional operators and amounts — not your account.</span>
-      <span className="flex gap-3">
+      <span className="flex flex-wrap gap-x-3 gap-y-1">
         {SCREENS.map((s) => <Link key={s} href={`/preview/${s}`} className="font-medium underline-offset-2 hover:underline">{s}</Link>)}
       </span>
     </div>
@@ -48,6 +56,64 @@ export default async function PreviewPage({ params, searchParams }: PageProps<"/
         avgPriceMinor={averagePricePerKwhMinor(previewItems)}
         addSession={<SessionForm vehicles={previewVehicles.map((v) => ({ id: v.id, label: v.nickname || `${v.make} ${v.model}` }))} bookings={[]} />}
       />
+    );
+  }
+
+  if (screen === "live") {
+    return (
+      <div className="mx-auto max-w-3xl space-y-5">
+        <Banner />
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Demo Hub — Ahmedabad</h1>
+          <p className="text-sm text-zinc-500">DC fast charger 1 · up to 60 kW · Daily driver</p>
+        </div>
+        <LiveCharging reference="EV-DEMO7Q2K" initial={previewLive} canStart demo />
+      </div>
+    );
+  }
+
+  if (screen === "station") {
+    return (
+      <div className="mx-auto max-w-xl space-y-5">
+        <Banner />
+        <h1 className="text-2xl font-semibold tracking-tight">Demo Hub — Ahmedabad</h1>
+        <EvseLivePanel stationId="preview" initial={previewEvses} demoNow={PREVIEW_NOW.getTime()} />
+      </div>
+    );
+  }
+
+  if (screen === "route") {
+    return (
+      <RoutePlanView
+        banner={<Banner />}
+        result={previewRoute}
+        form={<RouteForm action="/preview/route" vehicles={[{ id: "v1", label: "Daily driver", batteryKwh: 40.5 }]}
+          d={{ from: "Ahmedabad", to: "Surat", vehicleId: "v1", soc: "72", reserve: "15", consumption: "14.8", consumptionHint: "Your average from your own entries: 14.8 kWh/100 km" }} />}
+      />
+    );
+  }
+
+  if (screen === "analytics") {
+    const items = previewItems.map((i, n) => ({ ...i, chargerKw: i.title.startsWith("GreenPlug") ? 7.4 : 60, source: n % 4 === 1 ? ("charger_ocpp" as const) : i.source, isSimulated: n % 4 === 1 }));
+    return <AnalyticsView banner={<Banner />} a={chargingAnalytics(items, PREVIEW_NOW, TZ)} />;
+  }
+
+  if (screen === "home") {
+    return (
+      <div className="space-y-6">
+        <Banner />
+        <div className="flex items-center justify-between gap-3 rounded-2xl bg-gradient-to-r from-energy-800 to-energy-600 p-4 text-white shadow-md">
+          <span className="flex items-center gap-3">
+            <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-charge-400 motion-safe:animate-pulse" />
+            <span>
+              <span className="block font-semibold">Charging at Demo Hub — Ahmedabad</span>
+              <span className="block text-sm text-white/80">20.9 kWh · 49 kW · 83% · Simulated</span>
+            </span>
+          </span>
+          <span aria-hidden="true" className="text-xl">→</span>
+        </div>
+        <Recommendations items={previewRecs} vehicleLabel="Daily driver" located />
+      </div>
     );
   }
 

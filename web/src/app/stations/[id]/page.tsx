@@ -3,6 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { addCheckin, deleteStation } from "@/app/actions";
 import { StatusBadge } from "@/components/StatusBadge";
+import { EvseLivePanel } from "@/components/live/EvseLivePanel";
+import { StationLiveBadge } from "@/components/live/LiveBadge";
+import { getEvseLive } from "@/server/live";
 import { WEEKDAYS } from "@/lib/format";
 import { timeAgo } from "@/lib/geo";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
@@ -31,7 +34,7 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
   if (!station) notFound();
 
   const supabase = await createClient();
-  const [{ data: connectors }, { data: checkins }, user, { data: bookable }, { data: hours }] = await Promise.all([
+  const [{ data: connectors }, { data: checkins }, user, { data: bookable }, { data: hours }, evseLive] = await Promise.all([
     supabase.from("connectors").select("*").eq("station_id", id).order("power_kw", { ascending: false }),
     supabase
       .from("checkins")
@@ -42,6 +45,7 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
     getCurrentUser(),
     supabase.from("evses").select("id").eq("station_id", id).eq("is_bookable", true).eq("is_active", true).limit(1),
     supabase.from("operating_hours").select("weekday,opens_at,closes_at").eq("station_id", id).order("weekday").order("opens_at"),
+    getEvseLive(id),
   ]);
   const canBook = (bookable ?? []).length > 0;
   const hoursByDay = WEEKDAYS.map((d, i) => ({
@@ -67,6 +71,7 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-semibold tracking-tight">{station.name}</h1>
             <StatusBadge status={station.last_status} />
+            <StationLiveBadge s={station} />
           </div>
           <p className="mt-1 text-zinc-500">{formatPlace(station)}</p>
           {station.is_demo && <p className="mt-1 text-xs text-amber-600">Demo data — not a real station.</p>}
@@ -143,6 +148,7 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
         </div>
 
         <div className="space-y-4 lg:col-span-2">
+          <EvseLivePanel stationId={station.id} initial={evseLive} />
           {!canBook && (
             <section className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
               <h2 className="font-medium">Online booking isn’t available here</h2>

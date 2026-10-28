@@ -28,6 +28,9 @@ const ERRORS: Record<string, { status: number; code: string }> = {
   EVB16: { status: 422, code: "check_in_window" },
   EVB17: { status: 422, code: "incompatible_vehicle" },
   EVB18: { status: 409, code: "vehicle_in_use" },
+  EVB19: { status: 422, code: "charger_not_connected" },
+  EVB20: { status: 409, code: "already_charging" },
+  EVB21: { status: 409, code: "not_charging" },
   "42501": { status: 403, code: "forbidden" },
   "40P01": { status: 409, code: "busy" }, // deadlock (should not happen: writes are queued per charging point)
   "40001": { status: 409, code: "busy" }, // serialization failure
@@ -65,7 +68,7 @@ function toBookingError(e: PgError): BookingError {
   return new BookingError("internal_error", 500, "Something went wrong. Please try again.");
 }
 
-async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
+export async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc(fn, args);
   if (error) throw toBookingError(error);
@@ -75,7 +78,7 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
 const BOOKING_COLUMNS =
   "id,reference,status,period,hold_expires_at,price_snapshot,currency,reservation_fee_minor,estimated_total_minor," +
   "cancellation_fee_minor,confirmed_at,checked_in_at,cancelled_at,cancel_reason,created_at," +
-  "station:stations(id,name,address,city,city_is_approx,time_zone),evse:evses(id,label,max_power_kw),vehicle:vehicles(id,make,model,nickname)";
+  "station:stations(id,name,address,city,city_is_approx,time_zone),evse:evses(id,label,max_power_kw,charge_point_id),vehicle:vehicles(id,make,model,nickname)";
 
 export async function getAvailability(stationId: string, date: string, durationMin: number): Promise<Slot[]> {
   return rpc<Slot[]>("get_availability", { p_station_id: stationId, p_date: date, p_duration_min: durationMin });
@@ -109,7 +112,7 @@ export async function compatibleEvses(vehicleId: string, stationId: string) {
   });
 }
 
-async function idForReference(reference: string): Promise<string> {
+export async function idForReference(reference: string): Promise<string> {
   const supabase = await createClient();
   const { data, error } = await supabase.from("bookings").select("id").eq("reference", reference).maybeSingle();
   if (error) throw toBookingError(error);

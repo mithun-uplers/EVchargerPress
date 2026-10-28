@@ -28,6 +28,12 @@ Drivers can reserve a charging point at stations that take bookings (currently t
 cancelled, expired and no-show bookings. All rules are enforced in Postgres. See [docs/BOOKING_ENGINE.md](docs/BOOKING_ENGINE.md)
 for the rules, status model and `/api/v1` endpoints, and [docs/TESTING.md](docs/TESTING.md) to run the tests.
 
+## Smart EV features
+Live charger status and live sessions over OCPP 1.6J (with an OCPP WebSocket gateway in `tools/ocpp-gateway`
+and an in-database charger simulator for the demo stations), charger-reported battery %, charging analytics
+(`/analytics`), route planning with charging stops (`/route`) and explainable recommendations on Home.
+Simulated and estimated values are always labelled. See [docs/SMART_EV.md](docs/SMART_EV.md).
+
 ## Data model
 | table | purpose | who can write |
 |---|---|---|

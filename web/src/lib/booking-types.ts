@@ -63,7 +63,7 @@ export type BookingRow = {
   cancel_reason: string | null;
   created_at: string;
   station: { id: string; name: string; address: string | null; city: string | null; city_is_approx: boolean; time_zone: string } | null;
-  evse: { id: string; label: string; max_power_kw: number | null } | null;
+  evse: { id: string; label: string; max_power_kw: number | null; charge_point_id?: string | null } | null;
   vehicle: { id: string; make: string; model: string; nickname: string | null } | null;
 };
 

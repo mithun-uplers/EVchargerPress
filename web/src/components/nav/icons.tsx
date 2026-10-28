@@ -16,3 +16,5 @@ export const CarIcon = svg(<><path d="M5 17h14M5 17v2M19 17v2" /><path d="M3 13.
 export const BoltIcon = svg(<path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" />);
 export const UserIcon = svg(<><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>);
 export const PlusIcon = svg(<path d="M12 5v14M5 12h14" />);
+export const RouteIcon = svg(<><circle cx="6" cy="19" r="2" /><circle cx="18" cy="5" r="2" /><path d="M8 19h7.5a3.5 3.5 0 0 0 0-7h-7a3.5 3.5 0 0 1 0-7H16" /></>);
+export const ChartIcon = svg(<><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></>);

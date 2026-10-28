@@ -30,6 +30,9 @@ export default async function VehiclePage({ params, searchParams }: PageProps<"/
   const mine = all.filter((i) => i.vehicleId === id);
   const ownPrice = averagePricePerKwhMinor(mine);
   const anyPrice = ownPrice ?? averagePricePerKwhMinor(all);
+  const fromCharger = sessions
+    .filter((x) => x.vehicle?.id === id && x.source !== "manual" && x.last_soc_percent !== null && x.last_meter_at)
+    .sort((a, b) => Date.parse(b.last_meter_at!) - Date.parse(a.last_meter_at!))[0];
   const editing = sp.edit === "1";
   const preferred = profile?.preferred_vehicle_id === vehicle.id;
 
@@ -37,6 +40,7 @@ export default async function VehiclePage({ params, searchParams }: PageProps<"/
     <VehicleDashboard
       vehicle={vehicle}
       readings={readings}
+      chargerReading={fromCharger ? { soc_percent: Number(fromCharger.last_soc_percent), recorded_at: fromCharger.last_meter_at!, simulated: fromCharger.is_simulated } : null}
       items={mine}
       upcoming={upcomingBriefs(upcomingRows).filter((b) => b.vehicleId === id)}
       pricePerKwhMinor={anyPrice}
