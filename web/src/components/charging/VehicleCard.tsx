@@ -10,12 +10,14 @@ export function VehicleCard({
   preferred,
   action,
   timeZone = "Asia/Kolkata",
+  connected = null,
 }: {
   vehicle: Vehicle;
   latest: BatteryReading | null;
   preferred: boolean;
   action?: ReactNode;
   timeZone?: string;
+  connected?: { simulated: boolean } | null;
 }) {
   return (
     <li className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200/70 dark:bg-zinc-900 dark:ring-zinc-800">
@@ -27,11 +29,19 @@ export function VehicleCard({
               {VEHICLE_TYPE_LABEL[v.vehicle_type]}{v.model_year ? ` · ${v.model_year}` : ""}{v.nickname ? ` · ${v.make} ${v.model}` : ""}
             </p>
           </div>
-          {preferred && <span className="shrink-0 rounded-full bg-energy-600 px-2 py-0.5 text-xs font-medium text-white">Preferred</span>}
+          <span className="flex shrink-0 flex-col items-end gap-1">
+            {preferred && <span className="rounded-full bg-energy-600 px-2 py-0.5 text-xs font-medium text-white">Preferred</span>}
+            {connected && (
+              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${connected.simulated ? "bg-charge-50 text-charge-600 ring-1 ring-inset ring-charge-200" : "bg-energy-100 text-energy-800"}`}>
+                {connected.simulated ? "Simulated car" : "Connected"}
+              </span>
+            )}
+          </span>
         </div>
         <div className="mt-2 flex items-end justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <BatteryBar percent={latest?.soc_percent !== null && latest ? Number(latest.soc_percent) : null} recordedAt={latest?.recorded_at} timeZone={timeZone} size="sm" />
+            <BatteryBar percent={latest?.soc_percent !== null && latest ? Number(latest.soc_percent) : null} recordedAt={latest?.recorded_at} timeZone={timeZone} size="sm"
+              sourceLabel={latest?.source === "vehicle_api" ? (latest.is_simulated ? "Simulated car" : "From car") : "Manual"} />
           </div>
           <VehicleArt type={v.vehicle_type} className="h-14 w-auto shrink-0 text-energy-600" />
         </div>

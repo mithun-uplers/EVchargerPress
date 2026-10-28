@@ -35,6 +35,7 @@ export function VehicleDashboard({
   now = new Date(),
   preferredSlot,
   editSlot,
+  connectSlot,
   readingForm,
   removeSlot,
   details,
@@ -50,6 +51,7 @@ export function VehicleDashboard({
   now?: Date;
   preferredSlot?: ReactNode;
   editSlot?: ReactNode;
+  connectSlot?: ReactNode;
   readingForm?: ReactNode;
   removeSlot?: ReactNode;
   details?: ReactNode;
@@ -59,7 +61,9 @@ export function VehicleDashboard({
   // Battery % reported by a connected charger during a session counts as telemetry (labelled with its source).
   const chargerSoc = chargerReading && (!manualSoc || Date.parse(chargerReading.recorded_at) > Date.parse(manualSoc.recorded_at)) ? chargerReading : null;
   const latestSoc = chargerSoc ? { soc_percent: chargerSoc.soc_percent, recorded_at: chargerSoc.recorded_at } : manualSoc;
-  const socLabel = chargerSoc ? (chargerSoc.simulated ? "Simulated charger" : "From charger") : "Manual";
+  const socLabel = chargerSoc
+    ? (chargerSoc.simulated ? "Simulated charger" : "From charger")
+    : manualSoc?.source === "vehicle_api" ? (manualSoc.is_simulated ? "Simulated car" : "From car") : "Manual";
   const latestOdo = readings.find((r) => r.odometer_km !== null) ?? null;
   const battery = vehicle.battery_capacity_kwh !== null ? Number(vehicle.battery_capacity_kwh) : null;
   const powerKw = vehicle.max_dc_kw ? Number(vehicle.max_dc_kw) : vehicle.max_ac_kw ? Number(vehicle.max_ac_kw) : null;
@@ -106,6 +110,8 @@ export function VehicleDashboard({
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-5">
+          {connectSlot}
+
           {/* Charge estimate */}
           <section aria-labelledby="est-h" className={card}>
             <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -181,7 +187,7 @@ export function VehicleDashboard({
                 />
               </div>
             </div>
-            <p className="mt-2 text-xs text-zinc-500">From readings you entered — not live vehicle data. We don’t calculate battery health from percentage alone.</p>
+            <p className="mt-2 text-xs text-zinc-500">From your entries and, if connected, your car — each row shows its source. We don’t calculate battery health from percentage alone.</p>
             {readingForm && <div className="mt-4 border-t border-zinc-100 pt-4 dark:border-zinc-800">{readingForm}</div>}
             {readings.length > 0 && (
               <details className="mt-4 text-sm">
@@ -197,7 +203,7 @@ export function VehicleDashboard({
                         <td className="py-1.5">{formatLocal(r.recorded_at, timeZone)}</td>
                         <td className="py-1.5 tabular-nums">{r.soc_percent !== null ? `${Number(r.soc_percent)}%` : "—"}</td>
                         <td className="py-1.5 tabular-nums">{r.odometer_km !== null ? `${Number(r.odometer_km).toLocaleString("en-IN")} km` : "—"}</td>
-                        <td className="py-1.5 text-zinc-500">{r.source === "manual" ? "Manual" : "Vehicle"}</td>
+                        <td className="py-1.5 text-zinc-500">{r.source === "manual" ? "Manual" : r.is_simulated ? "Simulated car" : "From car"}</td>
                       </tr>
                     ))}
                   </tbody>

@@ -5,18 +5,14 @@ import { RouteForm } from "@/components/route/RouteForm";
 import { RouteMap } from "@/components/route/RouteMap";
 import { RoutePlanView, type RouteResult } from "@/components/route/RoutePlanView";
 import { efficiencyKwhPer100Km, toHistoryItems } from "@/lib/charging-stats";
-import { planRoute } from "@/lib/route-plan";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getProfile, listBatteryReadings, listSessions, listVehicles, vehicleLabel } from "@/server/account";
-import { drivingRoute, geocode, stationsAlongRoute } from "@/server/routing";
+import { planTrip } from "@/server/trip-planner";
+import { saveTripAction } from "@/app/trips/actions";
 
 export const metadata: Metadata = { title: "Plan a trip" };
 
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
-const num = (v: string, lo: number, hi: number) => {
-  const n = Number(v);
-  return v.trim() !== "" && Number.isFinite(n) && n >= lo && n <= hi ? n : null;
-};
 
 export default async function RoutePage({ searchParams }: PageProps<"/route">) {
   const user = await getCurrentUser();
@@ -48,36 +44,11 @@ export default async function RoutePage({ searchParams }: PageProps<"/route">) {
   let error: string | null = null;
   let line: [number, number][] = [];
   if (submitted) {
-    const soc = num(d.soc, 1, 100);
-    const reserve = num(d.reserve, 0, 50) ?? 15;
-    const consumption = num(d.consumption, 3, 60);
-    const battery = vehicle?.battery_capacity_kwh ? Number(vehicle.battery_capacity_kwh) : null;
-    if (!vehicle) error = "Add a vehicle first so we know which connectors you can use.";
-    else if (!battery) error = "Add your vehicle’s battery size (My vehicles → Edit) to plan charging stops.";
-    else if (soc === null) error = "Enter your current battery % (1–100).";
-    else if (consumption === null) error = "Enter your consumption in kWh/100 km (3–60).";
-    else if (soc <= reserve) error = "Your battery is already at or below the reserve you set.";
-    else {
-      const [from, to] = await Promise.all([geocode(d.from), geocode(d.to)]);
-      if (!from || !to) error = `We couldn’t find ${!from ? `“${d.from}”` : `“${d.to}”`}. Try a city name or “lat, lng”.`;
-      else {
-        const route = await drivingRoute(from.lngLat, to.lngLat);
-        line = route.coordinates;
-        const stations = await stationsAlongRoute(route.coordinates, 5);
-        const plan = planRoute({
-          distanceKm: route.distanceKm, startSocPct: soc, reservePct: reserve, batteryKwh: battery, consumptionKwhPer100Km: consumption,
-          vehicleConnectors: vehicle.vehicle_connectors.map((c) => c.connector_type),
-          vehicleMaxDcKw: vehicle.max_dc_kw ? Number(vehicle.max_dc_kw) : null, vehicleMaxAcKw: vehicle.max_ac_kw ? Number(vehicle.max_ac_kw) : null,
-          stations,
-        });
-        result = {
-          fromLabel: from.label, toLabel: to.label, distanceKm: route.distanceKm, durationMin: route.durationMin, source: route.source, plan,
-          inputs: { startSocPct: soc, reservePct: reserve, batteryKwh: battery, consumption, consumptionSource: one(sp.consumption) && Number(one(sp.consumption)) !== myEfficiency ? "entered" : myEfficiency !== null ? "your history" : "entered" },
-          stationsConsidered: stations.length,
-        };
-      }
-    }
+    const res = await planTrip({ from: d.from, to: d.to, soc: d.soc, reserve: d.reserve, consumption: d.consumption }, vehicle, myEfficiency);
+    if (res.ok) ({ result, line } = res.planned);
+    else error = res.error;
   }
+  const saveError = one(sp.save_error).slice(0, 200);
 
   return (
     <RoutePlanView
@@ -92,6 +63,17 @@ export default async function RoutePage({ searchParams }: PageProps<"/route">) {
       }
       result={result}
       error={error}
+      save={result ? (
+        <form action={saveTripAction} className="relative mt-4 flex flex-col gap-2 sm:flex-row">
+          {(["from", "to", "soc", "reserve", "consumption"] as const).map((k) => <input key={k} type="hidden" name={k} value={d[k]} />)}
+          <input type="hidden" name="vehicle" value={vehicleId} />
+          <label className="sr-only" htmlFor="trip-name">Trip name</label>
+          <input id="trip-name" name="name" maxLength={80} placeholder={`${result.fromLabel.split(",")[0]} → ${result.toLabel.split(",")[0]}`}
+            className="min-h-11 flex-1 rounded-xl bg-white/95 px-3 text-sm text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-4 focus:ring-charge-400/40" />
+          <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-charge-400 px-5 text-sm font-semibold text-zinc-900 shadow-sm hover:bg-charge-300">Save trip</button>
+          {saveError && <p role="alert" className="text-sm text-charge-100 sm:basis-full">{saveError}</p>}
+        </form>
+      ) : null}
       map={result && line.length > 1 ? (
         <RouteMap line={line} straight={result.source === "straight_line"} stops={result.plan.stops.map((s) => ({ lngLat: [s.station.lng, s.station.lat] as [number, number], label: s.station.name }))} />
       ) : null}

@@ -9,6 +9,9 @@ import { upcomingBriefs } from "@/lib/booking-brief";
 import { averagePricePerKwhMinor, toHistoryItems } from "@/lib/charging-stats";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getProfile, getVehicle, listBatteryReadings, listFinishedBookings, listSessions } from "@/server/account";
+import { VehicleConnectPanel, type ConnectNotice } from "@/components/vehicles/VehicleConnectPanel";
+import { smartcarConfigured, smartcarMode } from "@/server/smartcar";
+import { connectionsFor, syncSmartcar, telemetry } from "@/server/vehicle-connect";
 import { listBookings } from "@/server/bookings";
 
 export const metadata: Metadata = { title: "Vehicle" };
@@ -23,9 +26,25 @@ export default async function VehiclePage({ params, searchParams }: PageProps<"/
   const sp = await searchParams;
   const [vehicle, profile] = await Promise.all([getVehicle(id), getProfile(user.id)]);
   if (!vehicle) notFound();
-  const [readings, sessions, finished, upcomingRows] = await Promise.all([
-    listBatteryReadings(id), listSessions(500), listFinishedBookings(200), listBookings("upcoming"),
+  // Keep a Smartcar connection fresh: pull new signals when the last reading is over 15 minutes old.
+  const nowMs = new Date().getTime();
+  let connection = (await connectionsFor([id]))[id] ?? null;
+  let autoSyncError: string | null = null;
+  if (connection?.provider === "smartcar" && connection.status === "active" && smartcarConfigured()
+      && (!connection.last_synced_at || nowMs - Date.parse(connection.last_synced_at) > 15 * 60_000)) {
+    autoSyncError = await syncSmartcar(connection.id);
+    connection = (await connectionsFor([id]))[id] ?? null;
+  }
+  const [readings, sessions, finished, upcomingRows, carTelemetry] = await Promise.all([
+    listBatteryReadings(id), listSessions(500), listFinishedBookings(200), listBookings("upcoming"), connection ? telemetry(id) : Promise.resolve([]),
   ]);
+  const one = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string).slice(0, 200) : "");
+  const notice: ConnectNotice = one("connect_error") ? { kind: "error", text: one("connect_error") }
+    : one("connected") === "smartcar" ? { kind: "ok", text: "Your car is connected through Smartcar." }
+    : one("connected") === "simulator" ? { kind: "ok", text: "Simulated car connected. It reports a reading every 5 minutes." }
+    : one("synced") ? { kind: "ok", text: "Synced with your car." }
+    : one("disconnected") ? { kind: "ok", text: "Disconnected. Readings already saved stay in your history." }
+    : autoSyncError ? { kind: "error", text: autoSyncError } : null;
   const all = toHistoryItems(sessions, finished);
   const mine = all.filter((i) => i.vehicleId === id);
   const ownPrice = averagePricePerKwhMinor(mine);
@@ -69,6 +88,10 @@ export default async function VehiclePage({ params, searchParams }: PageProps<"/
         ) : null
       }
       readingForm={<BatteryReadingForm vehicleId={vehicle.id} />}
+      connectSlot={
+        <VehicleConnectPanel vehicleId={vehicle.id} connection={connection} telemetry={carTelemetry} smartcarAvailable={smartcarConfigured()}
+          smartcarTestMode={smartcarMode() === "simulated"} notice={notice} now={nowMs} />
+      }
       removeSlot={<RemoveVehicleButton vehicleId={vehicle.id} />}
     />
   );

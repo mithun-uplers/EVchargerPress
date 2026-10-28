@@ -18,3 +18,6 @@ export const UserIcon = svg(<><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 
 export const PlusIcon = svg(<path d="M12 5v14M5 12h14" />);
 export const RouteIcon = svg(<><circle cx="6" cy="19" r="2" /><circle cx="18" cy="5" r="2" /><path d="M8 19h7.5a3.5 3.5 0 0 0 0-7h-7a3.5 3.5 0 0 1 0-7H16" /></>);
 export const ChartIcon = svg(<><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></>);
+export const SignOutIcon = svg(<><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" /><path d="M10 17l-5-5 5-5" /><path d="M5 12h11" /></>);
+export const TripIcon = svg(<><path d="M9 20 3 17V4l6 3 6-3 6 3v13l-6-3-6 3Z" /><path d="M9 7v13M15 4v13" /></>);
+export const PlugIcon = svg(<><path d="M9 2v6M15 2v6" /><path d="M6 8h12v3a6 6 0 0 1-12 0V8Z" /><path d="M12 17v5" /></>);

@@ -5,14 +5,17 @@ import { setPreferredVehicle } from "@/app/account/actions";
 import { VehicleCard } from "@/components/charging/VehicleCard";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getProfile, latestReadings, listVehicles } from "@/server/account";
+import { connectionsFor } from "@/server/vehicle-connect";
 
 export const metadata: Metadata = { title: "My vehicles" };
 
-export default async function VehiclesPage() {
+export default async function VehiclesPage({ searchParams }: PageProps<"/vehicles">) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/vehicles");
   const [vehicles, profile] = await Promise.all([listVehicles(), getProfile(user.id)]);
-  const latest = await latestReadings(vehicles.map((v) => v.id));
+  const [latest, connections] = await Promise.all([latestReadings(vehicles.map((v) => v.id)), connectionsFor(vehicles.map((v) => v.id))]);
+  const sp = await searchParams;
+  const connectError = typeof sp.connect_error === "string" ? sp.connect_error.slice(0, 200) : "";
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -26,6 +29,7 @@ export default async function VehiclesPage() {
         </Link>
       </div>
 
+      {connectError && <p role="alert" className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700 ring-1 ring-inset ring-rose-200">{connectError}</p>}
       {vehicles.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-zinc-300 bg-white/60 p-10 text-center dark:border-zinc-700 dark:bg-transparent">
           <p className="font-medium">No vehicles yet.</p>
@@ -41,6 +45,7 @@ export default async function VehiclesPage() {
                 vehicle={v}
                 latest={latest[v.id] ?? null}
                 preferred={preferred}
+                connected={connections[v.id] && connections[v.id].status !== "pending" ? { simulated: connections[v.id].provider === "simulator" || connections[v.id].mode === "simulated" } : null}
                 action={
                   !preferred && (
                     <form action={setPreferredVehicle}>

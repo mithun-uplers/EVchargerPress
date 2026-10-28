@@ -49,3 +49,28 @@ body {
 .bar-estimate {
   background-image: repeating-linear-gradient(135deg, transparent 0 3px, rgb(245 184 0 / 0.45) 3px 5px);
 }
+
+/* Interactive elements show a pointer (Tailwind v4 no longer sets it on buttons). */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="radio"],
+  [role="tab"],
+  a[href],
+  summary,
+  select:not(:disabled),
+  label:has(> input[type="checkbox"]),
+  label:has(> input[type="radio"]),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  input[type="submit"]:not(:disabled),
+  input[type="date"],
+  input[type="datetime-local"] {
+    cursor: pointer;
+  }
+  button:disabled,
+  select:disabled,
+  input:disabled {
+    cursor: not-allowed;
+  }
+}

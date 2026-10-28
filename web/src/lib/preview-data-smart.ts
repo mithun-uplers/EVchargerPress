@@ -10,6 +10,8 @@ import type { RouteStation } from "@/lib/route-plan";
 import { planRoute } from "@/lib/route-plan";
 import { PREVIEW_NOW } from "@/lib/preview-data";
 import type { StationSummary } from "@/lib/types";
+import type { TripRow, TripStationRow } from "@/server/trips";
+import type { Telemetry, VehicleConnection } from "@/server/vehicle-connect";
 
 const START = Date.parse("2026-10-28T09:04:00Z");
 const NOW_ISO = PREVIEW_NOW.toISOString(); // 09:30Z
@@ -113,3 +115,50 @@ export const previewBookings: BookingRow[] = [
   bk({ status: "pending", reference: "EV-2H7DQ8RT", hold_expires_at: "2026-10-28T09:38:00Z", period: '["2026-11-02 12:00:00+00","2026-11-02 12:45:00+00")',
     evse: { id: "e2", label: "AC charger 1", max_power_kw: 7.4, charge_point_id: null }, estimated_total_minor: 27100 }),
 ];
+
+// ---- Saved trips + connected car previews ----
+
+export const previewTrip: TripRow = {
+  id: "00000000-0000-4000-8000-0000000000t1", name: "Diwali drive to Surat", vehicle_id: "v1",
+  from_label: "Ahmedabad, Gujarat", from_lat: 23.0225, from_lng: 72.5714, to_label: "Surat, Gujarat", to_lat: 21.1702, to_lng: 72.8311,
+  distance_km: 268, duration_min: 262, route_source: "osrm",
+  route_geometry: { type: "LineString", coordinates: [[72.5714, 23.0225], [72.68, 22.69], [73.18, 22.31], [72.99, 21.70], [72.8311, 21.1702]] },
+  start_soc_percent: 72, reserve_percent: 15, consumption_kwh_per_100km: 14.8, battery_kwh: 40.5,
+  feasible: true, arrive_soc_percent: 18, charge_minutes: 27, energy_kwh: 18, gap_from_km: null, gap_to_km: null,
+  notes: "Leave by 8 am; lunch at the Vadodara stop.", created_at: "2026-10-27T15:20:00Z",
+  vehicle: { make: "Sample Motors", model: "City EV", nickname: "Daily driver" },
+};
+const ts = (i: number, o: Partial<TripStationRow>): TripStationRow => ({
+  id: i, station_id: null, name: "Station", city: null, operator: null, lat: 22.5, lng: 73, connector_types: ["CCS2"], max_power_kw: 60,
+  is_bookable: false, is_compatible: true, along_km: 0, detour_km: 0.5, stop_order: null, arrive_soc_percent: null, depart_soc_percent: null,
+  energy_kwh: null, power_kw: null, charge_minutes: null, ...o,
+});
+export const previewTripStations: TripStationRow[] = [
+  ts(1, { name: "GreenPlug Nadiad (sample)", city: "Nadiad", operator: "GreenPlug", max_power_kw: 30, along_km: 38 }),
+  ts(2, { name: "Anand Dairy Road AC (sample)", city: "Anand", connector_types: ["Type 2"], max_power_kw: 7.4, is_compatible: false, along_km: 61, detour_km: 2.1 }),
+  ts(3, { name: "VoltGrid Vadodara Expressway (sample)", city: "Vadodara", operator: "VoltGrid", max_power_kw: 120, is_bookable: true, along_km: 102, detour_km: 0.6,
+    stop_order: 1, arrive_soc_percent: 35, depart_soc_percent: 79, energy_kwh: 18, power_kw: 50, charge_minutes: 27 }),
+  ts(4, { name: "Ather Grid Vadodara", city: "Vadodara", operator: "Ather", connector_types: ["Other"], max_power_kw: 3.3, is_compatible: false, along_km: 106, detour_km: 3.4 }),
+  ts(5, { name: "Highway Café Chargers (sample)", city: "Bharuch", operator: "HighwayCharge", max_power_kw: 60, along_km: 161, detour_km: 1.4 }),
+  ts(6, { name: "Navsari Fast Hub (sample)", city: "Navsari", operator: "VoltGrid", max_power_kw: 60, is_bookable: true, along_km: 239 }),
+];
+export const previewTripList = [
+  { ...previewTrip, counts: { stops: 1, stations: 6, compatible: 4 } },
+  { ...previewTrip, id: "t2", name: "Weekend: Bengaluru → Mysuru", from_label: "Bengaluru", to_label: "Mysuru", distance_km: 145, duration_min: 175, feasible: true, created_at: "2026-10-20T06:00:00Z", counts: { stops: 0, stations: 23, compatible: 11 } },
+  { ...previewTrip, id: "t3", name: "Pune → Goa (long range)", from_label: "Pune", to_label: "Goa", distance_km: 452, duration_min: 560, feasible: false, created_at: "2026-10-12T04:00:00Z", route_source: "straight_line" as const, counts: { stops: 2, stations: 9, compatible: 3 } },
+];
+
+export const previewConnection: VehicleConnection = {
+  id: "c1", vehicle_id: "00000000-0000-4000-8000-000000000001", provider: "simulator", mode: "simulated", status: "active",
+  provider_make: null, provider_model: null, provider_year: null, has_vehicle: false,
+  last_synced_at: "2026-10-28T09:27:00Z", last_error: null, created_at: "2026-10-27T08:00:00Z",
+};
+export const previewTelemetry: Telemetry[] = Array.from({ length: 30 }, (_, i) => {
+  const t = Date.parse("2026-10-28T09:27:00Z") - i * 45 * 60_000;
+  const soc = Math.min(90, 64 + i * 0.5 + (i > 18 ? 6 : 0));
+  return {
+    id: i, recorded_at: new Date(t).toISOString(), soc_percent: Math.round(soc * 10) / 10, range_km: Math.round((soc / 100) * 40.5 / 0.15),
+    odometer_km: 18640 - i * 2.1, is_charging: false, is_plugged_in: false, charge_power_kw: null, charge_limit_percent: 90,
+    latitude: 23.0338, longitude: 72.5850, source: "simulator", is_simulated: true,
+  };
+});

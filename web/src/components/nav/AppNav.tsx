@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BoltIcon, CalendarIcon, CarIcon, ChartIcon, HomeIcon, MapIcon, PlusIcon, RouteIcon, UserIcon } from "./icons";
+import { BoltIcon, CalendarIcon, CarIcon, ChartIcon, HomeIcon, MapIcon, PlusIcon, RouteIcon, TripIcon, UserIcon } from "./icons";
 
 const ITEMS = [
   { href: "/", label: "Home", icon: HomeIcon, match: (p: string) => p === "/" || p.startsWith("/stations") },
@@ -10,6 +10,7 @@ const ITEMS = [
   { href: "/bookings", label: "Bookings", icon: CalendarIcon, match: (p: string) => p.startsWith("/bookings") },
   { href: "/vehicles", label: "Vehicles", icon: CarIcon, match: (p: string) => p.startsWith("/vehicles") },
   { href: "/route", label: "Plan trip", icon: RouteIcon, match: (p: string) => p.startsWith("/route"), desktopOnly: true },
+  { href: "/trips", label: "Saved trips", icon: TripIcon, match: (p: string) => p.startsWith("/trips"), desktopOnly: true },
   { href: "/history", label: "History", icon: BoltIcon, match: (p: string) => p.startsWith("/history") || p.startsWith("/analytics") },
   { href: "/analytics", label: "Analytics", icon: ChartIcon, match: (p: string) => p.startsWith("/analytics"), desktopOnly: true },
   { href: "/profile", label: "Profile", icon: UserIcon, match: (p: string) => p.startsWith("/profile") || p.startsWith("/onboarding") },

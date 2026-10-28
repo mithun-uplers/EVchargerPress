@@ -34,10 +34,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </a>
         <div className="md:grid md:min-h-screen md:grid-cols-[15rem_1fr]">
           {/* Desktop sidebar */}
-          <aside className="hidden border-r border-zinc-200 bg-white px-3 py-4 md:flex md:flex-col md:gap-6 dark:border-zinc-800 dark:bg-zinc-950">
+          <aside className="hidden border-r border-zinc-200 bg-white px-3 py-4 md:sticky md:top-0 md:flex md:h-screen md:flex-col md:gap-6 md:overflow-y-auto dark:border-zinc-800 dark:bg-zinc-950">
             <div className="px-2"><Logo /></div>
             <SidebarNav />
-            <div className="mt-auto px-2">
+            <div className="mt-auto">
               <Suspense fallback={null}>
                 <UserMenu />
               </Suspense>

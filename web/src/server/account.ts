@@ -32,7 +32,7 @@ export type Vehicle = {
   vehicle_connectors: { connector_type: string; supported_power_kw: number | null }[];
 };
 
-export type BatteryReading = { id: number; recorded_at: string; soc_percent: number | null; odometer_km: number | null; source: string; notes: string | null };
+export type BatteryReading = { id: number; recorded_at: string; soc_percent: number | null; odometer_km: number | null; source: string; notes: string | null; is_simulated?: boolean };
 
 export type Session = {
   id: string;
@@ -84,7 +84,7 @@ export async function listBatteryReadings(vehicleId: string, limit = 60): Promis
   const supabase = await createClient();
   const { data } = await supabase
     .from("battery_readings")
-    .select("id,recorded_at,soc_percent,odometer_km,source,notes")
+    .select("id,recorded_at,soc_percent,odometer_km,source,notes,is_simulated")
     .eq("vehicle_id", vehicleId)
     .order("recorded_at", { ascending: false })
     .limit(limit);
@@ -147,7 +147,7 @@ export async function latestReadings(vehicleIds: string[]): Promise<Record<strin
   const supabase = await createClient();
   const { data } = await supabase
     .from("battery_readings")
-    .select("id,vehicle_id,recorded_at,soc_percent,odometer_km,source,notes")
+    .select("id,vehicle_id,recorded_at,soc_percent,odometer_km,source,notes,is_simulated")
     .in("vehicle_id", vehicleIds)
     .order("recorded_at", { ascending: false })
     .limit(200);

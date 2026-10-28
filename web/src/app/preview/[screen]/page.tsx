@@ -8,8 +8,13 @@ import { VehicleDashboard } from "@/components/charging/VehicleDashboard";
 import { BatteryReadingForm } from "@/components/vehicles/VehicleExtras";
 import { averagePricePerKwhMinor, buildHistory, normalisePeriod, periodKeys, type HistoryMetric, type HistoryView as View } from "@/lib/charging-stats";
 import { PREVIEW_NOW, previewItems, previewLatest, previewReadings, previewUpcoming, previewVehicles } from "@/lib/preview-data";
-import { previewBookings, previewEvses, previewLive, previewRecs, previewRoute, previewStation, previewStations } from "@/lib/preview-data-smart";
+import { previewBookings, previewConnection, previewEvses, previewLive, previewRecs, previewRoute, previewStation, previewStations, previewTelemetry, previewTrip, previewTripList, previewTripStations } from "@/lib/preview-data-smart";
 import { BookingCard } from "@/components/booking/BookingCard";
+import { TripStations } from "@/components/route/TripStations";
+import { AccountMenuView } from "@/components/UserMenu";
+import { VehicleConnectPanel } from "@/components/vehicles/VehicleConnectPanel";
+import { resultFromTrip, stationItems } from "@/lib/trip-view";
+import { formatDuration } from "@/lib/charging-stats";
 import { HomeHero, StationCard, StationHero } from "@/components/stations/StationBlocks";
 import { AnalyticsView } from "@/components/charging/AnalyticsView";
 import { EvseLivePanel } from "@/components/live/EvseLivePanel";
@@ -21,7 +26,7 @@ import { chargingAnalytics } from "@/lib/analytics";
 
 export const metadata: Metadata = { title: "Design preview", robots: { index: false, follow: false } };
 
-const SCREENS = ["home", "station", "bookings", "live", "route", "history", "analytics", "vehicle", "vehicles"] as const;
+const SCREENS = ["home", "station", "bookings", "live", "route", "trips", "trip", "connect", "account", "history", "analytics", "vehicle", "vehicles"] as const;
 const TZ = "Asia/Kolkata";
 
 function Banner() {
@@ -58,6 +63,79 @@ export default async function PreviewPage({ params, searchParams }: PageProps<"/
         avgPriceMinor={averagePricePerKwhMinor(previewItems)}
         addSession={<SessionForm vehicles={previewVehicles.map((v) => ({ id: v.id, label: v.nickname || `${v.make} ${v.model}` }))} bookings={[]} />}
       />
+    );
+  }
+
+  if (screen === "trips") {
+    return (
+      <div className="mx-auto max-w-4xl space-y-5">
+        <Banner />
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Saved trips</h1>
+            <p className="mt-1 text-sm text-zinc-500">Each trip keeps its route, charging stops and every station along the way.</p>
+          </div>
+          <span className="inline-flex min-h-11 items-center rounded-xl bg-energy-600 px-5 text-sm font-semibold text-white shadow-sm">Plan a new trip</span>
+        </div>
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {previewTripList.map((t) => (
+            <li key={t.id} className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-zinc-200/70">
+              <div className="flex items-start justify-between gap-3">
+                <p className="min-w-0 truncate font-semibold">{t.name}</p>
+                <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${t.feasible ? "bg-energy-100 text-energy-800" : "bg-rose-100 text-rose-800"}`}>{t.feasible ? `${t.counts.stops} stop${t.counts.stops === 1 ? "" : "s"}` : "Gap on route"}</span>
+              </div>
+              <p className="mt-0.5 truncate text-sm text-zinc-500">{t.from_label.split(",")[0]} → {t.to_label.split(",")[0]}</p>
+              <dl className="mt-3 grid grid-cols-3 gap-2 text-sm">
+                <div><dt className="text-[11px] text-zinc-500">Distance</dt><dd className="font-semibold">{Math.round(t.distance_km)} km</dd></div>
+                <div><dt className="text-[11px] text-zinc-500">Driving</dt><dd className="font-semibold">{formatDuration(t.duration_min)}</dd></div>
+                <div><dt className="text-[11px] text-zinc-500">Stations</dt><dd className="font-semibold">{t.counts.stations} <span className="text-xs font-normal text-zinc-500">({t.counts.compatible} fit)</span></dd></div>
+              </dl>
+              <p className="mt-3 text-xs text-zinc-500">Saved {new Date(t.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} · Daily driver{t.route_source === "straight_line" ? " · straight-line estimate" : ""}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
+  if (screen === "trip") {
+    const live = new Map([["x", { total: 4, free: 2, simulated: true }]]);
+    const items = stationItems(previewTripStations, live).map((s) => (s.stopOrder === 1 ? { ...s, live: { total: 4, free: 2, simulated: true } } : s));
+    return (
+      <RoutePlanView
+        title={previewTrip.name}
+        subtitle="Saved 27 Oct 2026 · Daily driver · battery levels and times are the estimates from when you planned it."
+        banner={<><Banner /><div className="flex flex-wrap items-center justify-between gap-3"><span className="text-sm text-zinc-500">← Saved trips</span>
+          <div className="flex flex-wrap gap-2"><span className="inline-flex min-h-11 items-center rounded-xl bg-white px-4 text-sm font-medium shadow-sm ring-1 ring-inset ring-zinc-200">Plan again with today’s battery</span>
+          <span className="inline-flex min-h-11 items-center rounded-xl px-4 text-sm font-medium text-rose-700 ring-1 ring-inset ring-rose-200">Delete</span></div>
+          <p className="basis-full text-sm text-zinc-600">{previewTrip.notes}</p></div></>}
+        result={resultFromTrip(previewTrip, previewTripStations, new Map())}
+        extra={<TripStations items={items} filter={sp.stations === "compatible" ? "compatible" : sp.stations === "stops" ? "stops" : "all"} baseHref="/preview/trip" />}
+      />
+    );
+  }
+
+  if (screen === "connect") {
+    return (
+      <div className="mx-auto max-w-3xl space-y-5">
+        <Banner />
+        <VehicleConnectPanel vehicleId="v" connection={previewConnection} telemetry={previewTelemetry} smartcarAvailable smartcarTestMode notice={{ kind: "ok", text: "Simulated car connected. It reports a reading every 5 minutes." }} now={PREVIEW_NOW.getTime()} demo />
+        <VehicleConnectPanel vehicleId="v" connection={null} telemetry={[]} smartcarAvailable={false} smartcarTestMode notice={null} now={PREVIEW_NOW.getTime()} demo />
+      </div>
+    );
+  }
+
+  if (screen === "account") {
+    return (
+      <div className="mx-auto max-w-md space-y-6">
+        <Banner />
+        <h1 className="text-xl font-semibold">Account menu</h1>
+        <p className="text-sm text-zinc-500">Desktop: bottom of the sidebar (now always visible). Phone: tap your initials in the top bar.</p>
+        <div className="w-60"><AccountMenuView name="Mithun" email="mithun.r@example.com" initials="M" demo /></div>
+        <div className="relative flex justify-end rounded-2xl bg-white p-3 pb-96 shadow-sm ring-1 ring-zinc-200/70">
+          <div className="[&_details]:open"><AccountMenuView name="Mithun" email="mithun.r@example.com" initials="M" compact demo /></div>
+        </div>
+      </div>
     );
   }
 
@@ -116,6 +194,12 @@ export default async function PreviewPage({ params, searchParams }: PageProps<"/
       <RoutePlanView
         banner={<Banner />}
         result={previewRoute}
+        save={
+          <div className="relative mt-4 flex flex-col gap-2 sm:flex-row">
+            <input aria-label="Trip name" placeholder="Ahmedabad → Surat" className="min-h-11 flex-1 rounded-xl bg-white/95 px-3 text-sm text-zinc-900 placeholder:text-zinc-500" />
+            <button type="button" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-charge-400 px-5 text-sm font-semibold text-zinc-900 shadow-sm">Save trip</button>
+          </div>
+        }
         form={<RouteForm action="/preview/route" vehicles={[{ id: "v1", label: "Daily driver", batteryKwh: 40.5 }]}
           d={{ from: "Ahmedabad", to: "Surat", vehicleId: "v1", soc: "72", reserve: "15", consumption: "14.8", consumptionHint: "Your average from your own entries: 14.8 kWh/100 km" }} />}
       />

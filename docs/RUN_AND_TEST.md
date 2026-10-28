@@ -30,6 +30,9 @@ Phone on the same Wi-Fi: open `http://<your-Mac-IP>:3000` (System Settings → W
 | Charging history | /preview/history |
 | Analytics | /preview/analytics |
 | Vehicle dashboard / My vehicles | /preview/vehicle · /preview/vehicles |
+| Saved trips / one trip | /preview/trips · /preview/trip |
+| Connected car | /preview/connect |
+| Account menu (Sign out) | /preview/account |
 | Sign in / Create account | /login · /login?mode=signup |
 
 Check each on desktop and on mobile width (browser dev tools → toggle device toolbar → iPhone 12/13).
@@ -57,7 +60,21 @@ Check each on desktop and on mobile width (browser dev tools → toggle device t
 If charging never starts: the booking must be checked in or within its check-in window, and the
 station must be a demo station (only those are connected to the simulator).
 
-## 4. Automated checks (optional)
+## 4. Account menu, saved trips and connected cars
+
+- **Sign out**: desktop — the account card at the bottom of the left sidebar (it now stays on screen
+  while you scroll); phone — tap your initials (top right) → **Sign out**; also on **My profile**.
+- **Save a trip**: plan a route on **Plan a trip** → give it a name → **Save trip**. Open
+  **Saved trips** (`/trips`, sidebar or account menu) to see the stops, battery chart, map and the
+  full list of charging stations on the route (filters: All · Fits my car · Planned stops), plus
+  **Plan again with today's battery** and **Delete**.
+- **Connect a car**: **My vehicles** → your vehicle → **Connected car**.
+  - **Connect simulated car** works straight away: battery, range, odometer, charging and location
+    appear (labelled *Simulated*) and update every 5 minutes; during a live charging session it
+    follows the charger's battery %.
+  - **Connect with Smartcar** needs the Smartcar keys first — see `docs/VEHICLE_CONNECT.md`.
+
+## 5. Automated checks (optional)
 
 ```bash
 cd web
@@ -67,7 +84,7 @@ npm run lint && npm run build
 
 The database tests (`--project db`) need a local Postgres 16 + PostGIS — see docs/TESTING.md.
 
-## 5. Optional: a "real" OCPP charger
+## 6. Optional: a "real" OCPP charger
 
 See `tools/ocpp-gateway/README.md` to run the WebSocket gateway and the command-line charger
 simulator against your local app.

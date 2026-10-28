@@ -31,6 +31,7 @@ const ERRORS: Record<string, { status: number; code: string }> = {
   EVB19: { status: 422, code: "charger_not_connected" },
   EVB20: { status: 409, code: "already_charging" },
   EVB21: { status: 409, code: "not_charging" },
+  EVB22: { status: 409, code: "already_connected" },
   "42501": { status: 403, code: "forbidden" },
   "40P01": { status: 409, code: "busy" }, // deadlock (should not happen: writes are queued per charging point)
   "40001": { status: 409, code: "busy" }, // serialization failure

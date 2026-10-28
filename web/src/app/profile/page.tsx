@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { signOut } from "@/app/actions";
 import { AccountForm, DeleteAccountForm, PreferencesForm } from "@/components/account/ProfileForms";
+import { SignOutIcon } from "@/components/nav/icons";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { ui } from "@/lib/ui";
 import { getProfile, listVehicles, vehicleLabel } from "@/server/account";
@@ -48,9 +49,13 @@ export default async function ProfilePage() {
       </section>
       <Card title="Account">
         <AccountForm email={user.email} profile={profile} />
-        <div className="mt-4 flex flex-wrap gap-4 border-t border-zinc-100 pt-4 text-sm dark:border-zinc-800">
-          <Link href="/reset-password" className={ui.link}>Change password</Link>
-          <form action={signOut}><button className="font-medium text-zinc-600 hover:underline dark:text-zinc-300">Sign out</button></form>
+        <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-zinc-100 pt-4 text-sm dark:border-zinc-800">
+          <Link href="/reset-password" className={ui.btnLight}>Change password</Link>
+          <form action={signOut}>
+            <button className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rose-50 px-4 text-sm font-semibold text-rose-700 ring-1 ring-inset ring-rose-200 hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-500/30">
+              <SignOutIcon className="h-4 w-4" /> Sign out
+            </button>
+          </form>
         </div>
       </Card>
       <Card title="Preferences">

@@ -35,12 +35,12 @@ function SocProfile({ r }: { r: RouteResult }) {
   const d = pts.map((p, i) => `${i ? "L" : "M"}${x(p.km).toFixed(1)} ${y(p.soc).toFixed(1)}`).join(" ");
   return (
     <figure>
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Estimated battery level along the route" className="w-full">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Estimated battery level along the route" className="max-h-72 w-full">
         <rect x={pl} y={y(r.inputs.reservePct)} width={W - pl - pr} height={y(0) - y(r.inputs.reservePct)} className="fill-rose-500/10" />
         {[100, 50, r.inputs.reservePct, 0].map((v) => (
           <g key={v}>
             <line x1={pl} x2={W - pr} y1={y(v)} y2={y(v)} className="stroke-zinc-200 dark:stroke-zinc-800" strokeDasharray="3 4" />
-            <text x={pl - 6} y={y(v) + 4} textAnchor="end" className="fill-zinc-400 text-[15px] tabular-nums">{v}%</text>
+            <text x={pl - 6} y={y(v) + 4} textAnchor="end" className="fill-zinc-400 text-[13px] tabular-nums">{v}%</text>
           </g>
         ))}
         <path d={`${d} L${x(endKm)} ${y(0)} L${x(0)} ${y(0)} Z`} className="fill-energy-500/10" />
@@ -49,11 +49,11 @@ function SocProfile({ r }: { r: RouteResult }) {
           <g key={s.station.id}>
             <line x1={x(s.station.along_km)} x2={x(s.station.along_km)} y1={y(s.arriveSocPct)} y2={y(s.departSocPct)} className="stroke-charge-400" strokeWidth={6} strokeLinecap="round" />
             <circle cx={x(s.station.along_km)} cy={y(s.departSocPct) - 14} r={10} className="fill-charge-400" />
-            <text x={x(s.station.along_km)} y={y(s.departSocPct) - 10} textAnchor="middle" className="fill-zinc-900 text-[15px] font-bold">{i + 1}</text>
+            <text x={x(s.station.along_km)} y={y(s.departSocPct) - 10} textAnchor="middle" className="fill-zinc-900 text-[13px] font-bold">{i + 1}</text>
           </g>
         ))}
-        <text x={pl} y={H - 6} className="fill-zinc-500 text-[15px]">A · 0 km</text>
-        <text x={W - pr} y={H - 6} textAnchor="end" className="fill-zinc-500 text-[15px]">B · {km(r.distanceKm)}</text>
+        <text x={pl} y={H - 6} className="fill-zinc-500 text-[13px]">A · 0 km</text>
+        <text x={W - pr} y={H - 6} textAnchor="end" className="fill-zinc-500 text-[13px]">B · {km(r.distanceKm)}</text>
       </svg>
       <figcaption className="mt-1 text-xs text-zinc-500">Estimated battery % along the route. Shaded band = your arrival reserve.</figcaption>
     </figure>
@@ -96,17 +96,20 @@ function Stop({ s, i }: { s: PlannedStop; i: number }) {
   );
 }
 
-export function RoutePlanView({ form, result, map, error, banner }: { form: ReactNode; result: RouteResult | null; map?: ReactNode; error?: string | null; banner?: ReactNode }) {
+export function RoutePlanView({ form, result, map, error, banner, save, title = "Plan a trip", subtitle, extra }: {
+  form?: ReactNode; result: RouteResult | null; map?: ReactNode; error?: string | null; banner?: ReactNode; save?: ReactNode;
+  title?: string; subtitle?: ReactNode; extra?: ReactNode;
+}) {
   const p = result?.plan;
   return (
     <div className="space-y-5">
       {banner}
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Plan a trip</h1>
-        <p className="mt-1 text-sm text-zinc-500">Charging stops matched to your vehicle’s connectors. All times and battery levels are estimates.</p>
+        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <p className="mt-1 text-sm text-zinc-500">{subtitle ?? "Charging stops matched to your vehicle’s connectors. All times and battery levels are estimates."}</p>
       </div>
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[22rem_minmax(0,1fr)]">
-        <section aria-label="Trip details" className={`${card} h-fit ${result ? "order-2 lg:order-none" : ""}`}>{form}</section>
+      <div className={`grid grid-cols-1 gap-5 ${form ? "lg:grid-cols-[22rem_minmax(0,1fr)]" : ""}`}>
+        {form && <section aria-label="Trip details" className={`${card} h-fit ${result ? "order-2 lg:order-none" : ""}`}>{form}</section>}
         <div className="min-w-0 space-y-5">
           {error && <p role="alert" className="rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">{error}</p>}
           {!result && !error && (
@@ -132,6 +135,7 @@ export function RoutePlanView({ form, result, map, error, banner }: { form: Reac
                     <BoltIcon className="h-3.5 w-3.5" /> ~{formatDuration(p.chargeMinutes)} charging · ~{p.energyKwh} kWh added
                   </p>
                 )}
+                {save}
               </section>
               {result.source === "straight_line" && (
                 <p role="note" className="rounded-xl bg-charge-50 px-3 py-2 text-xs text-charge-600 ring-1 ring-inset ring-charge-200">
@@ -169,6 +173,7 @@ export function RoutePlanView({ form, result, map, error, banner }: { form: Reac
                   Checked {result.stationsConsidered} stations within 5 km of the route. Speed, weather, load and elevation change real range — keep a margin.
                 </p>
               </section>
+              {extra}
             </>
           )}
         </div>
