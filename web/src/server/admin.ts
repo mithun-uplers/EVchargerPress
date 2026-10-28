@@ -208,3 +208,19 @@ export async function listAudit(opts: { table?: string | null; page: number; siz
   if (error) throw toBookingError(error);
   return { rows: (data ?? []) as AuditEntry[], total: count ?? 0 };
 }
+
+export type AdminUserDetail = {
+  id: string; email: string; display_name: string | null; phone: string | null; status: "active" | "suspended" | "deletion_requested";
+  is_admin: boolean; created_at: string; last_sign_in_at: string | null; email_confirmed: boolean; onboarded_at: string | null;
+  deletion_requested_at: string | null; password_change_required: boolean; bookings: number; bookings_upcoming: number;
+  vehicles: number; sessions: number; checkins: number; reviews: number;
+};
+export const getUser = (id: string) => rpc<AdminUserDetail>("admin_get_user", { p_user_id: id });
+
+/** Latest admin audit entries about one user (account, profile, role and status changes). */
+export async function userAudit(id: string, limit = 20) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("admin_audit").select("*").eq("target_id", id).order("id", { ascending: false }).limit(limit);
+  if (error) throw toBookingError(error);
+  return (data ?? []) as AuditEntry[];
+}

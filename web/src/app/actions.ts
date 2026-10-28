@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
+import { createServiceClient, serviceConfigured } from "@/lib/supabase/service";
 
 const str = (v: FormDataEntryValue | null) => (typeof v === "string" ? v.trim() : "");
 const enc = encodeURIComponent;
@@ -19,9 +20,11 @@ export async function signIn(formData: FormData) {
   const password = str(formData.get("password"));
   const next = safeNext(str(formData.get("next")) || "/");
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) redirect(`/login?error=${enc(error.message)}&next=${enc(next)}`);
   revalidatePath("/", "layout");
+  // Accounts created (or reset) by an admin must choose their own password first.
+  if (data.user?.app_metadata?.password_change_required === true) redirect(`/reset-password?required=1`);
   redirect(next);
 }
 
@@ -108,8 +111,15 @@ export async function updatePassword(formData: FormData) {
   if (!user) redirect(`/forgot-password?error=${enc("Your reset link has expired. Request a new one.")}`);
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.updateUser({ password });
+  const { data, error } = await supabase.auth.updateUser({ password });
   if (error) redirect(`/reset-password?error=${enc(error.message)}`);
+  if (data.user?.app_metadata?.password_change_required === true) {
+    // app_metadata can only be changed with the service role; then refresh so the session drops the flag.
+    if (serviceConfigured()) {
+      await createServiceClient().auth.admin.updateUserById(user.id, { app_metadata: { password_change_required: false } });
+      await supabase.auth.refreshSession();
+    }
+  }
   revalidatePath("/", "layout");
   redirect(`/?message=${enc("Password updated.")}`);
 }

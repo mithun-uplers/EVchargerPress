@@ -170,4 +170,25 @@ describe("admin role", () => {
     const audit = (await db.query("select detail from public.admin_audit where target_id = $1", [ident])).rows;
     expect(JSON.stringify(audit)).not.toContain(secret);
   });
+
+  it("admins view and edit a user's profile and record account changes", async () => {
+    const admin = await makeAdmin();
+    const driver = await createUser("Old Name");
+    const u = expectOk(await asUser<{ u: Record<string, unknown> }>(admin, NOW, "select public.admin_get_user($1) as u", [driver])).u;
+    expect(u).toMatchObject({ id: driver, display_name: "Old Name", status: "active", is_admin: false, password_change_required: false, bookings: 0 });
+    expect(errorCode(await asUser(driver, NOW, "select public.admin_get_user($1)", [driver]))).toBe("42501");
+
+    expect(errorCode(await asUser(admin, NOW, "select * from public.admin_update_profile($1, ' ', null)", [driver]))).toBe("EVB24");
+    expect(errorCode(await asUser(admin, NOW, "select * from public.admin_update_profile($1, 'New', 'abc')", [driver]))).toBe("EVB24");
+    const p = expectOk(await asUser<{ display_name: string; phone: string }>(admin, NOW, "select * from public.admin_update_profile($1, ' New Name ', '+91 98765-43210')", [driver]));
+    expect(p).toMatchObject({ display_name: "New Name", phone: "+919876543210" });
+    expect(errorCode(await asUser(driver, NOW, "select * from public.admin_update_profile($1, 'Me', null)", [driver]))).toBe("42501");
+
+    expect(errorCode(await asUser(admin, NOW, "select public.admin_record_account_change('drop_db', $1)", [driver]))).toBe("EVB24");
+    expectOk(await asUser(admin, NOW, `select public.admin_record_account_change('set_password', $1, '{"password":"x","require_change":true}'::jsonb)`, [driver]));
+    const log = (await db.query("select action, detail from public.admin_audit where target_id = $1 order by id", [driver])).rows;
+    expect(log.map((l) => l.action)).toEqual(["update_profile", "set_password"]);
+    expect(log[0].detail).toEqual({ display_name: { from: "Old Name", to: "New Name" }, phone: { from: null, to: "+919876543210" } });
+    expect(log[1].detail).toEqual({ require_change: true });
+  });
 });

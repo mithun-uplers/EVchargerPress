@@ -27,11 +27,14 @@ import { AdminNav } from "@/components/admin/AdminNav";
 import { DashboardView } from "@/components/admin/DashboardView";
 import { StationManageView } from "@/components/admin/StationManageView";
 import { UsersView } from "@/components/admin/UsersView";
-import { previewAdminStation, previewDashboard, previewUsers } from "@/lib/preview-data-admin";
+import { UserDetailView } from "@/components/admin/UserDetailView";
+import { CreateUserForm } from "@/components/admin/UserForms";
+import { AdminHeader } from "@/components/admin/AdminUI";
+import { previewAdminStation, previewDashboard, previewUserAudit, previewUserDetail, previewUsers } from "@/lib/preview-data-admin";
 
 export const metadata: Metadata = { title: "Design preview", robots: { index: false, follow: false } };
 
-const SCREENS = ["home", "station", "bookings", "live", "route", "trips", "trip", "connect", "account", "history", "analytics", "vehicle", "vehicles", "admin", "admin-station", "admin-users"] as const;
+const SCREENS = ["home", "station", "bookings", "live", "route", "trips", "trip", "connect", "account", "history", "analytics", "vehicle", "vehicles", "admin", "admin-station", "admin-users", "admin-user", "admin-new-user"] as const;
 const TZ = "Asia/Kolkata";
 
 function Banner() {
@@ -130,7 +133,7 @@ export default async function PreviewPage({ params, searchParams }: PageProps<"/
     );
   }
 
-  if (screen === "admin" || screen === "admin-station" || screen === "admin-users") {
+  if (screen.startsWith("admin")) {
     return (
       <div className="space-y-5">
         <Banner />
@@ -138,6 +141,13 @@ export default async function PreviewPage({ params, searchParams }: PageProps<"/
         {screen === "admin" && <DashboardView d={previewDashboard} />}
         {screen === "admin-station" && <StationManageView d={previewAdminStation} sp={{}} />}
         {screen === "admin-users" && <UsersView rows={previewUsers} q={null} page={1} size={25} meId="u1" sp={{ ok: "Admin access granted." }} />}
+        {screen === "admin-user" && <UserDetailView u={previewUserDetail} audit={previewUserAudit} isSelf={false} canManageAccounts sp={{}} />}
+        {screen === "admin-new-user" && (
+          <div className="mx-auto max-w-2xl space-y-5">
+            <AdminHeader title="Add a user" subtitle="Create a confirmed account for a driver or another admin." />
+            <CreateUserForm disabled={false} />
+          </div>
+        )}
       </div>
     );
   }

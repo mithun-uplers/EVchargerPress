@@ -1,4 +1,4 @@
-import type { AdminUser, Dashboard, StationDetail } from "@/server/admin";
+import type { AdminUser, AdminUserDetail, AuditEntry, Dashboard, StationDetail } from "@/server/admin";
 
 /** Fictional sample data for the admin design preview. */
 export const previewDashboard: Dashboard = {
@@ -33,4 +33,15 @@ export const previewUsers: AdminUser[] = [
   { id: "u1", email: "admin@example.com", display_name: "Admin Person", status: "active", is_admin: true, created_at: "2026-10-01T06:00:00Z", last_sign_in_at: "2026-10-28T05:00:00Z", email_confirmed: true, bookings: 4, vehicles: 1, sessions: 6, total: 3 },
   { id: "u2", email: "driver.one@example.com", display_name: "Driver One", status: "active", is_admin: false, created_at: "2026-10-12T06:00:00Z", last_sign_in_at: "2026-10-27T15:00:00Z", email_confirmed: true, bookings: 11, vehicles: 2, sessions: 14, total: 3 },
   { id: "u3", email: "driver.two@example.com", display_name: "Driver Two", status: "suspended", is_admin: false, created_at: "2026-10-15T06:00:00Z", last_sign_in_at: null, email_confirmed: false, bookings: 5, vehicles: 1, sessions: 0, total: 3 },
+];
+
+export const previewUserDetail: AdminUserDetail = {
+  id: "00000000-0000-4000-8000-0000000000u2", email: "driver.one@example.com", display_name: "Driver One", phone: "+919800000001", status: "active",
+  is_admin: false, created_at: "2026-10-12T06:00:00Z", last_sign_in_at: "2026-10-27T15:00:00Z", email_confirmed: true, onboarded_at: "2026-10-12T06:10:00Z",
+  deletion_requested_at: null, password_change_required: true, bookings: 11, bookings_upcoming: 2, vehicles: 2, sessions: 14, checkins: 5, reviews: 2,
+};
+export const previewUserAudit: AuditEntry[] = [
+  { id: 3, actor_id: null, action: "update_profile", target_table: "profiles", target_id: "u2", detail: {}, created_at: "2026-10-20T08:00:00Z" },
+  { id: 2, actor_id: null, action: "reactivate_user", target_table: "profiles", target_id: "u2", detail: {}, created_at: "2026-10-18T08:00:00Z" },
+  { id: 1, actor_id: null, action: "suspend_user", target_table: "profiles", target_id: "u2", detail: { reason: "Repeated no-shows" }, created_at: "2026-10-16T08:00:00Z" },
 ];

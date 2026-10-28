@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { setAdminAction, setUserStatusAction } from "@/app/admin/actions";
 import { AdminHeader, Empty, Flash, Pager, Pill, TableCard, td, th } from "@/components/admin/AdminUI";
 import { formatLocal } from "@/lib/format";
@@ -18,7 +19,11 @@ export function UsersView({ rows, q, page, size, meId, sp }: { rows: AdminUser[]
   const back = link(page);
   return (
     <div className="space-y-4">
-      <AdminHeader title="Users" subtitle="Grant admin access or suspend accounts. Accounts are created by people signing up — admins never set passwords." />
+      <AdminHeader
+        title="Users"
+        subtitle="Add accounts, edit details, grant admin access, suspend or activate."
+        actions={<Link href="/admin/users/new" className={ui.btn}>Add a user</Link>}
+      />
       <Flash sp={sp} />
       <form className="flex gap-2" role="search">
         <label htmlFor="q" className="sr-only">Search users</label>
@@ -38,7 +43,7 @@ export function UsersView({ rows, q, page, size, meId, sp }: { rows: AdminUser[]
               return (
                 <tr key={u.id}>
                   <td className={`${td} min-w-[13rem]`}>
-                    <span className="font-medium">{u.display_name || "—"}{self && <span className="text-zinc-500"> (you)</span>}</span>
+                    <Link href={`/admin/users/${u.id}`} className="font-medium hover:underline">{u.display_name || "—"}</Link>{self && <span className="text-zinc-500"> (you)</span>}
                     <span className="block break-all text-xs text-zinc-500">{u.email}{!u.email_confirmed && " · email not confirmed"}</span>
                   </td>
                   <td className={`${td} whitespace-nowrap text-xs`}>
@@ -52,6 +57,7 @@ export function UsersView({ rows, q, page, size, meId, sp }: { rows: AdminUser[]
                   </td>
                   <td className={`${td} text-right`}>
                     <div className="flex flex-wrap justify-end gap-x-3">
+                      <Link href={`/admin/users/${u.id}`} className="inline-flex min-h-10 items-center text-sm font-medium text-zinc-700 hover:underline dark:text-zinc-200">Edit</Link>
                       {u.status === "active" && (
                         <form action={setAdminAction}>
                           <input type="hidden" name="user_id" value={u.id} />
@@ -80,7 +86,7 @@ export function UsersView({ rows, q, page, size, meId, sp }: { rows: AdminUser[]
                           <input type="hidden" name="user_id" value={u.id} />
                           <input type="hidden" name="status" value="active" />
                           <input type="hidden" name="back" value={back} />
-                          <button className="min-h-10 text-sm font-medium text-energy-700 hover:underline dark:text-energy-400">Reactivate</button>
+                          <button className="min-h-10 text-sm font-medium text-energy-700 hover:underline dark:text-energy-400">Activate</button>
                         </form>
                       )}
                     </div>

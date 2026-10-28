@@ -22,6 +22,9 @@ export default async function ResetPasswordPage({ searchParams }: PageProps<"/re
 
   return (
     <AuthShell title="Choose a new password" subtitle={`For ${user.email}`}>
+      {sp.required === "1" && (
+        <p className={`mb-4 ${ui.ok}`}>Your account was set up by an EVChargePress admin. Choose your own password to continue.</p>
+      )}
       {error && <p className={`mb-4 ${ui.error}`}>{error}</p>}
       <form action={updatePassword} className="space-y-4">
         <label className="block text-sm font-medium">

@@ -111,3 +111,11 @@ To regenerate: set `ENABLE_DESIGN_PREVIEW=1` in `web/.env.local`, run `npm run d
 ### Admin · users
 
 <img src="21-admin-users-mobile.png" width="240" alt="Admin users on mobile"> <img src="21-admin-users-desktop.png" width="560" alt="Admin users on desktop">
+
+### Admin · one user
+
+<img src="22-admin-user-detail-mobile.png" width="240" alt="Manage user on mobile"> <img src="22-admin-user-detail-desktop.png" width="560" alt="Manage user on desktop">
+
+### Admin · add a user
+
+<img src="23-admin-add-user-mobile.png" width="240" alt="Add a user on mobile"> <img src="23-admin-add-user-desktop.png" width="560" alt="Add a user on desktop">

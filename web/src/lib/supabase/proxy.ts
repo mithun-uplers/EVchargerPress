@@ -25,6 +25,19 @@ export async function updateSession(request: NextRequest) {
   );
 
   // Refreshes the auth token if needed. Do not remove.
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
+
+  // An admin created this account (or set its password): the person must choose their own first.
+  const appMeta = data?.claims?.app_metadata as { password_change_required?: boolean } | undefined;
+  const path = request.nextUrl.pathname;
+  const allowed = path === "/reset-password" || path.startsWith("/auth") || path.startsWith("/api") || path === "/login";
+  if (appMeta?.password_change_required === true && !allowed) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/reset-password";
+    url.search = "?required=1";
+    const redirect = NextResponse.redirect(url);
+    response.cookies.getAll().forEach((c) => redirect.cookies.set(c));
+    return redirect;
+  }
   return response;
 }
