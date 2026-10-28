@@ -9,6 +9,7 @@ import { upcomingBriefs } from "@/lib/booking-brief";
 import { averagePricePerKwhMinor, toHistoryItems } from "@/lib/charging-stats";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getProfile, getVehicle, listBatteryReadings, listFinishedBookings, listSessions } from "@/server/account";
+import { PlugIcon } from "@/components/nav/icons";
 import { VehicleConnectPanel, type ConnectNotice } from "@/components/vehicles/VehicleConnectPanel";
 import { smartcarConfigured, smartcarMode } from "@/server/smartcar";
 import { connectionsFor, syncSmartcar, telemetry } from "@/server/vehicle-connect";
@@ -74,6 +75,10 @@ export default async function VehiclePage({ params, searchParams }: PageProps<"/
               <button className="min-h-9 rounded-full bg-white/15 px-3 text-sm font-medium ring-1 ring-inset ring-white/30 hover:bg-white/25">Make preferred</button>
             </form>
           )}
+          <Link href="#connect" className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-charge-400 px-3 text-sm font-semibold text-zinc-900 hover:bg-charge-300">
+            <PlugIcon className="h-4 w-4" />
+            {connection && connection.status !== "pending" ? (connection.provider === "simulator" || connection.mode === "simulated" ? "Simulated car" : "Car connected") : "Connect car"}
+          </Link>
           {!editing && (
             <Link href={`/vehicles/${vehicle.id}?edit=1#edit`} className="inline-flex min-h-9 items-center rounded-full bg-white px-3 text-sm font-medium text-energy-800 hover:bg-energy-50">Edit</Link>
           )}

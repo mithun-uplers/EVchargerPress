@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { setPreferredVehicle } from "@/app/account/actions";
 import { VehicleCard } from "@/components/charging/VehicleCard";
+import { PlugIcon } from "@/components/nav/icons";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getProfile, latestReadings, listVehicles } from "@/server/account";
 import { connectionsFor } from "@/server/vehicle-connect";
@@ -22,7 +23,7 @@ export default async function VehiclesPage({ searchParams }: PageProps<"/vehicle
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">My vehicles</h1>
-          <p className="mt-1 text-sm text-zinc-500">Connector types decide which chargers you can book. Battery levels are from your manual readings.</p>
+          <p className="mt-1 text-sm text-zinc-500">Connector types decide which chargers you can book. Tap <strong>Connect car</strong> to read battery, range and location from the car itself.</p>
         </div>
         <Link href="/vehicles/new" className="inline-flex min-h-11 items-center rounded-xl bg-energy-600 px-4 text-sm font-medium text-white shadow-sm hover:bg-energy-700">
           Add vehicle
@@ -47,12 +48,19 @@ export default async function VehiclesPage({ searchParams }: PageProps<"/vehicle
                 preferred={preferred}
                 connected={connections[v.id] && connections[v.id].status !== "pending" ? { simulated: connections[v.id].provider === "simulator" || connections[v.id].mode === "simulated" } : null}
                 action={
-                  !preferred && (
-                    <form action={setPreferredVehicle}>
-                      <input type="hidden" name="id" value={v.id} />
-                      <button className="min-h-9 rounded-lg px-3 text-sm font-medium text-energy-700 hover:bg-energy-50 dark:text-energy-400 dark:hover:bg-energy-500/10">Make preferred</button>
-                    </form>
-                  )
+                  <span className="flex flex-wrap items-center gap-1">
+                    {!preferred && (
+                      <form action={setPreferredVehicle}>
+                        <input type="hidden" name="id" value={v.id} />
+                        <button className="min-h-9 rounded-lg px-3 text-sm font-medium text-energy-700 hover:bg-energy-50 dark:text-energy-400 dark:hover:bg-energy-500/10">Make preferred</button>
+                      </form>
+                    )}
+                    {!(connections[v.id] && connections[v.id].status !== "pending") && (
+                      <Link href={`/vehicles/${v.id}#connect`} className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-charge-400 px-3 text-sm font-semibold text-zinc-900 hover:bg-charge-300">
+                        <PlugIcon className="h-4 w-4" /> Connect car
+                      </Link>
+                    )}
+                  </span>
                 }
               />
             );

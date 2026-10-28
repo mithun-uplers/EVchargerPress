@@ -10,7 +10,7 @@ function initialsOf(name: string) {
 
 const LINKS = [
   { href: "/profile", label: "My profile" },
-  { href: "/vehicles", label: "My vehicles" },
+  { href: "/vehicles", label: "My vehicles · Connect car" },
   { href: "/trips", label: "Saved trips" },
   { href: "/history", label: "Charging history" },
   { href: "/analytics", label: "Analytics" },
