@@ -3,6 +3,7 @@ import { signOut } from "@/app/actions";
 import { SignOutIcon } from "@/components/nav/icons";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getProfile } from "@/server/account";
+import { isAdmin } from "@/server/admin";
 
 function initialsOf(name: string) {
   return name.split(/[\s._@-]+/).filter(Boolean).slice(0, 2).map((p) => p[0]!.toUpperCase()).join("") || "EV";
@@ -29,15 +30,15 @@ export async function UserMenu({ compact = false }: { compact?: boolean }) {
       </Link>
     );
   }
-  const profile = await getProfile(user.id);
+  const [profile, admin] = await Promise.all([getProfile(user.id), isAdmin()]);
   const name = profile?.display_name || user.email.split("@")[0];
   const initials = initialsOf(name);
 
-  return <AccountMenuView name={name} email={user.email} initials={initials} compact={compact} />;
+  return <AccountMenuView name={name} email={user.email} initials={initials} compact={compact} admin={admin} />;
 }
 
 /** Presentational account menu (also used by the design preview). */
-export function AccountMenuView({ name, email, initials, compact = false, demo = false }: { name: string; email: string; initials: string; compact?: boolean; demo?: boolean }) {
+export function AccountMenuView({ name, email, initials, compact = false, demo = false, admin = false }: { name: string; email: string; initials: string; compact?: boolean; demo?: boolean; admin?: boolean }) {
   if (compact) {
     return (
       <details className="group relative">
@@ -54,6 +55,9 @@ export function AccountMenuView({ name, email, initials, compact = false, demo =
             <p className="truncate text-xs text-zinc-500">{email}</p>
           </div>
           <nav aria-label="Account" className="py-1">
+            {admin && (
+              <Link href="/admin" className="flex min-h-11 items-center px-4 text-sm font-semibold text-energy-700 hover:bg-energy-50 dark:text-energy-400 dark:hover:bg-zinc-800">Admin panel</Link>
+            )}
             {LINKS.map((l) => (
               <Link key={l.href} href={l.href} className="flex min-h-11 items-center px-4 text-sm hover:bg-energy-50 dark:hover:bg-zinc-800">{l.label}</Link>
             ))}

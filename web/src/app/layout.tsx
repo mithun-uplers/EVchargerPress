@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { Suspense } from "react";
+import { AdminSidebarLinks } from "@/components/admin/AdminSidebarLinks";
 import { BottomNav, SidebarNav } from "@/components/nav/AppNav";
 import { UserMenu } from "@/components/UserMenu";
 import "./globals.css";
@@ -37,6 +38,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <aside className="hidden border-r border-zinc-200 bg-white px-3 py-4 md:sticky md:top-0 md:flex md:h-screen md:flex-col md:gap-6 md:overflow-y-auto dark:border-zinc-800 dark:bg-zinc-950">
             <div className="px-2"><Logo /></div>
             <SidebarNav />
+            <Suspense fallback={null}>
+              <AdminSidebarLinks />
+            </Suspense>
             <div className="mt-auto">
               <Suspense fallback={null}>
                 <UserMenu />

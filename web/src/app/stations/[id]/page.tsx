@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { addCheckin, deleteStation } from "@/app/actions";
+import { addCheckin } from "@/app/actions";
 import { StatusBadge } from "@/components/StatusBadge";
 import { EvseLivePanel } from "@/components/live/EvseLivePanel";
 import { StationHero } from "@/components/stations/StationBlocks";
+import { isAdmin } from "@/server/admin";
 import { getEvseLive } from "@/server/live";
 import { WEEKDAYS } from "@/lib/format";
 import { timeAgo } from "@/lib/geo";
@@ -54,7 +55,7 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
   }));
 
   const reports = (checkins ?? []) as unknown as Checkin[];
-  const isOwner = !!user && user.id === station.created_by;
+  const admin = await isAdmin();
   const d = 0.01;
   const bbox = [station.lng - d, station.lat - d, station.lng + d, station.lat + d].join(",");
   const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${station.lat},${station.lng}`;
@@ -109,11 +110,12 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
                 </dl>
               </div>
             )}
-            {isOwner && (
-              <form action={deleteStation} className="mt-4 border-t border-zinc-100 pt-4 dark:border-zinc-800">
-                <input type="hidden" name="station_id" value={station.id} />
-                <button className="text-sm font-medium text-rose-600 hover:underline">Delete this station</button>
-              </form>
+            {admin && (
+              <div className="mt-4 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+                <Link href={`/admin/stations/${station.id}`} className="text-sm font-medium text-energy-700 hover:underline dark:text-energy-400">
+                  Manage this station (admin)
+                </Link>
+              </div>
             )}
           </section>
         </div>

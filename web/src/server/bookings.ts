@@ -32,6 +32,11 @@ const ERRORS: Record<string, { status: number; code: string }> = {
   EVB20: { status: 409, code: "already_charging" },
   EVB21: { status: 409, code: "not_charging" },
   EVB22: { status: 409, code: "already_connected" },
+  EVB23: { status: 403, code: "account_suspended" },
+  EVB24: { status: 422, code: "invalid_admin_action" },
+  "23503": { status: 409, code: "in_use" },
+  "23505": { status: 409, code: "duplicate" },
+  "23514": { status: 400, code: "invalid_request" },
   "42501": { status: 403, code: "forbidden" },
   "40P01": { status: 409, code: "busy" }, // deadlock (should not happen: writes are queued per charging point)
   "40001": { status: 409, code: "busy" }, // serialization failure
@@ -52,7 +57,7 @@ export class BookingError extends Error {
 
 type PgError = { code?: string; message?: string; details?: string | null };
 
-function toBookingError(e: PgError): BookingError {
+export function toBookingError(e: PgError): BookingError {
   const known = e.code ? ERRORS[e.code] : undefined;
   if (known) {
     const message =
@@ -60,6 +65,10 @@ function toBookingError(e: PgError): BookingError {
         ? e.details
         : known.status === 403
           ? "You don't have permission to do that."
+          : known.code === "in_use"
+            ? "This is still used by bookings or sessions, so it can’t be removed. Deactivate it instead."
+            : known.code === "duplicate"
+              ? "That already exists."
           : known.code === "busy"
             ? "Lots of people are booking right now. Please try again."
             : "The request is not valid.";

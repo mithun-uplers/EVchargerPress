@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 
-export function LocationFields() {
-  const [lat, setLat] = useState("");
-  const [lng, setLng] = useState("");
+export function LocationFields({ defaultLat, defaultLng }: { defaultLat?: number | null; defaultLng?: number | null } = {}) {
+  const [lat, setLat] = useState(defaultLat != null ? String(defaultLat) : "");
+  const [lng, setLng] = useState(defaultLng != null ? String(defaultLng) : "");
   const [msg, setMsg] = useState<string | null>(null);
 
   function useMine() {

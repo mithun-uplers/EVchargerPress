@@ -34,6 +34,7 @@ Phone on the same Wi-Fi: open `http://<your-Mac-IP>:3000` (System Settings → W
 | Connected car | /preview/connect |
 | Account menu (Sign out) | /preview/account |
 | Sign in / Create account | /login · /login?mode=signup |
+| Admin dashboard / manage station / users | /preview/admin · /preview/admin-station · /preview/admin-users |
 
 Check each on desktop and on mobile width (browser dev tools → toggle device toolbar → iPhone 12/13).
 
@@ -74,7 +75,23 @@ station must be a demo station (only those are connected to the simulator).
     follows the charger's battery %.
   - **Connect with Smartcar** needs the Smartcar keys first — see `docs/VEHICLE_CONNECT.md`.
 
-## 5. Automated checks (optional)
+## 5. Admin panel
+
+Sign in as **mithun.r@mavlers.com** (the admin account). An **Admin** section appears at the bottom of
+the left sidebar (phone: initials menu → **Admin panel**). Drivers no longer see "Add a station".
+
+1. **Admin → Stations → Add a station**: create one, then on its page add a charging point (tick
+   *Bookable*), save opening hours, booking rules and a tariff. The **Ready for bookings?** card
+   turns all green and the station becomes bookable for drivers.
+2. **Bookings**: filter *Live*, open **Cancel…** on a booking and give a reason — no fee is charged.
+3. **Users**: **Make admin** / **Remove admin** (the last admin can't be removed), **Suspend…** with
+   a reason (their upcoming bookings are cancelled free; they can't book, check in or review).
+4. **Live chargers**: status of every registered charger; **Register a charger** shows its secret once.
+5. **Reports**: remove spam check-ins or reviews. **Audit log**: every admin change.
+
+Signed in as a normal driver, `/admin` redirects home and `/stations/new` is not available.
+
+## 6. Automated checks (optional)
 
 ```bash
 cd web
@@ -84,7 +101,7 @@ npm run lint && npm run build
 
 The database tests (`--project db`) need a local Postgres 16 + PostGIS — see docs/TESTING.md.
 
-## 6. Optional: a "real" OCPP charger
+## 7. Optional: a "real" OCPP charger
 
 See `tools/ocpp-gateway/README.md` to run the WebSocket gateway and the command-line charger
 simulator against your local app.

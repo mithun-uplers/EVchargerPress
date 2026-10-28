@@ -38,8 +38,8 @@ Simulated and estimated values are always labelled. See [docs/SMART_EV.md](docs/
 | table | purpose | who can write |
 |---|---|---|
 | profiles | display name per auth user (auto-created on signup) | owner |
-| stations | name, address, city, lat/lng, operator, access, hours, price | creator (insert/update/delete own) |
-| connectors | type, kW, quantity per station | station creator |
+| stations | name, address, city, lat/lng, operator, access, hours, price, verified | admins only |
+| connectors | type, kW, quantity per station | admins only |
 | checkins | working/busy/broken + comment | any signed-in user (own rows) |
 | station_summaries (view) | station + last status, max kW, connector types | read-only |
 
@@ -48,7 +48,7 @@ Everyone (including signed-out visitors) can read.
 ## Pages
 - `/` search by city/name/address, connector filter, "working only", "Near me" distance sort
 - `/stations/[id]` map (OpenStreetMap), connectors, details, directions, report status, recent reports
-- `/stations/new` add a station (with "use my location")
+- `/admin` admin panel (admins only): stations, charging points, tariffs, bookings, users, sessions, live chargers, reports, audit log — see docs/ADMIN.md
 - `/login` sign in / sign up · `/auth/confirm` email-link handler
 
 ## Next steps (post-MVP ideas)

@@ -15,6 +15,9 @@ create table if not exists auth.users (
   email text,
   raw_user_meta_data jsonb default '{}'::jsonb
 );
+alter table auth.users add column if not exists created_at timestamptz default now(),
+  add column if not exists last_sign_in_at timestamptz,
+  add column if not exists email_confirmed_at timestamptz;
 create or replace function auth.uid() returns uuid language sql stable as $$
   select coalesce(
     nullif(current_setting('request.jwt.claim.sub', true), ''),

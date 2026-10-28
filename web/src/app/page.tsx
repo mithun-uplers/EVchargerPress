@@ -64,7 +64,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const mapHref = hasLoc ? `/map?lat=${lat}&lng=${lng}` : "/map";
 
   // Only known messages are shown, so a crafted link cannot put arbitrary text on the page.
-  const message = ["Password updated."].includes(one(sp.message)) ? one(sp.message) : "";
+  const message = ["Password updated.", "That page is for EVChargePress admins."].includes(one(sp.message)) ? one(sp.message) : "";
 
   return (
     <div className="space-y-6">
@@ -139,9 +139,9 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         <div className="rounded-2xl border border-dashed border-zinc-300 bg-white/60 p-10 text-center dark:border-zinc-700 dark:bg-transparent">
           <p className="font-medium">No stations match.</p>
           <p className="mt-1 text-sm text-zinc-500">
-            Know one nearby?{" "}
-            <Link href="/stations/new" className="font-medium text-energy-700 hover:underline dark:text-energy-400">
-              Add it
+            Try another city or connector, or{" "}
+            <Link href="/map" className="font-medium text-energy-700 hover:underline dark:text-energy-400">
+              browse the map
             </Link>
             .
           </p>

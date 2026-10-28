@@ -99,3 +99,15 @@ To regenerate: set `ENABLE_DESIGN_PREVIEW=1` in `web/.env.local`, run `npm run d
 ### Forgot password
 
 <img src="18-forgot-password-mobile.png" width="240" alt="Forgot password on mobile"> <img src="18-forgot-password-desktop.png" width="560" alt="Forgot password on desktop">
+
+### Admin dashboard
+
+<img src="19-admin-dashboard-mobile.png" width="240" alt="Admin dashboard on mobile"> <img src="19-admin-dashboard-desktop.png" width="560" alt="Admin dashboard on desktop">
+
+### Admin · manage station
+
+<img src="20-admin-station-mobile.png" width="240" alt="Manage station on mobile"> <img src="20-admin-station-desktop.png" width="560" alt="Manage station on desktop">
+
+### Admin · users
+
+<img src="21-admin-users-mobile.png" width="240" alt="Admin users on mobile"> <img src="21-admin-users-desktop.png" width="560" alt="Admin users on desktop">

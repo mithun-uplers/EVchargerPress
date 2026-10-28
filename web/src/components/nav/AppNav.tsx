@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BoltIcon, CalendarIcon, CarIcon, ChartIcon, HomeIcon, MapIcon, PlusIcon, RouteIcon, TripIcon, UserIcon } from "./icons";
+import { BoltIcon, CalendarIcon, CarIcon, ChartIcon, HomeIcon, MapIcon, RouteIcon, TripIcon, UserIcon } from "./icons";
 
 const ITEMS = [
   { href: "/", label: "Home", icon: HomeIcon, match: (p: string) => p === "/" || p.startsWith("/stations") },
@@ -39,13 +39,6 @@ export function SidebarNav() {
           </Link>
         );
       })}
-      <Link
-        href="/stations/new"
-        className="mt-4 flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
-      >
-        <PlusIcon />
-        Add a station
-      </Link>
     </nav>
   );
 }

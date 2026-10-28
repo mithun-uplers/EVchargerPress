@@ -23,10 +23,15 @@ import { Recommendations } from "@/components/live/Recommendations";
 import { RouteForm } from "@/components/route/RouteForm";
 import { RoutePlanView } from "@/components/route/RoutePlanView";
 import { chargingAnalytics } from "@/lib/analytics";
+import { AdminNav } from "@/components/admin/AdminNav";
+import { DashboardView } from "@/components/admin/DashboardView";
+import { StationManageView } from "@/components/admin/StationManageView";
+import { UsersView } from "@/components/admin/UsersView";
+import { previewAdminStation, previewDashboard, previewUsers } from "@/lib/preview-data-admin";
 
 export const metadata: Metadata = { title: "Design preview", robots: { index: false, follow: false } };
 
-const SCREENS = ["home", "station", "bookings", "live", "route", "trips", "trip", "connect", "account", "history", "analytics", "vehicle", "vehicles"] as const;
+const SCREENS = ["home", "station", "bookings", "live", "route", "trips", "trip", "connect", "account", "history", "analytics", "vehicle", "vehicles", "admin", "admin-station", "admin-users"] as const;
 const TZ = "Asia/Kolkata";
 
 function Banner() {
@@ -125,15 +130,27 @@ export default async function PreviewPage({ params, searchParams }: PageProps<"/
     );
   }
 
+  if (screen === "admin" || screen === "admin-station" || screen === "admin-users") {
+    return (
+      <div className="space-y-5">
+        <Banner />
+        <AdminNav />
+        {screen === "admin" && <DashboardView d={previewDashboard} />}
+        {screen === "admin-station" && <StationManageView d={previewAdminStation} sp={{}} />}
+        {screen === "admin-users" && <UsersView rows={previewUsers} q={null} page={1} size={25} meId="u1" sp={{ ok: "Admin access granted." }} />}
+      </div>
+    );
+  }
+
   if (screen === "account") {
     return (
       <div className="mx-auto max-w-md space-y-6">
         <Banner />
         <h1 className="text-xl font-semibold">Account menu</h1>
         <p className="text-sm text-zinc-500">Desktop: bottom of the sidebar (now always visible). Phone: tap your initials in the top bar.</p>
-        <div className="w-60"><AccountMenuView name="Mithun" email="mithun.r@example.com" initials="M" demo /></div>
+        <div className="w-60"><AccountMenuView name="Mithun" email="mithun.r@example.com" initials="M" demo admin /></div>
         <div className="relative flex justify-end rounded-2xl bg-white p-3 pb-96 shadow-sm ring-1 ring-zinc-200/70">
-          <div className="[&_details]:open"><AccountMenuView name="Mithun" email="mithun.r@example.com" initials="M" compact demo /></div>
+          <div className="[&_details]:open"><AccountMenuView name="Mithun" email="mithun.r@example.com" initials="M" compact demo admin /></div>
         </div>
       </div>
     );
