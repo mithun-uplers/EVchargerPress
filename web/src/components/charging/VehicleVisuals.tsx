@@ -1,4 +1,5 @@
 import type { VehicleType } from "@/server/account";
+import { axisRange } from "@/lib/chart";
 import { formatLocal } from "@/lib/format";
 
 /** Original, generic line-art silhouettes per vehicle type (no real make or model is depicted). */
@@ -97,6 +98,7 @@ export function LineChart({
   caption,
   stroke = "stroke-energy-600",
   dot = "fill-energy-600",
+  timeZone = "Asia/Kolkata",
 }: {
   points: { t: string; v: number }[];
   label: string;
@@ -106,13 +108,12 @@ export function LineChart({
   caption?: string;
   stroke?: string;
   dot?: string;
+  timeZone?: string;
 }) {
   const pts = [...points].sort((a, b) => Date.parse(a.t) - Date.parse(b.t));
   if (pts.length < 2) return <p className="py-6 text-center text-sm text-zinc-500">Add at least two readings to see a trend.</p>;
   const W = 600, H = 150, pl = 52, pr = 10, pt = 10, pb = 22;
-  const lo = min ?? Math.min(...pts.map((p) => p.v));
-  const hi = max ?? Math.max(...pts.map((p) => p.v));
-  const span = hi - lo || 1;
+  const { lo, span, ticks } = axisRange(pts.map((p) => p.v), min, max);
   const t0 = Date.parse(pts[0].t), t1 = Date.parse(pts.at(-1)!.t);
   const x = (t: string) => pl + ((Date.parse(t) - t0) / Math.max(1, t1 - t0)) * (W - pl - pr);
   const y = (v: number) => pt + (1 - (v - lo) / span) * (H - pt - pb);
@@ -121,8 +122,8 @@ export function LineChart({
   return (
     <figure>
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label} className="w-full">
-        {[hi, lo + span / 2, lo].map((v) => (
-          <g key={v}>
+        {ticks.map((v, i) => (
+          <g key={i}>
             <line x1={pl} x2={W - pr} y1={y(v)} y2={y(v)} className="stroke-zinc-200 dark:stroke-zinc-800" strokeDasharray="3 4" />
             <text x={pl - 6} y={y(v) + 4} textAnchor="end" className="fill-zinc-400 text-[13px] tabular-nums">{format(v)}</text>
           </g>
@@ -130,8 +131,8 @@ export function LineChart({
         <path d={area} className="fill-energy-500/10" />
         <path d={d} fill="none" className={stroke} strokeWidth={2.5} strokeLinejoin="round" />
         {pts.map((p, i) => <circle key={i} cx={x(p.t)} cy={y(p.v)} r={3.5} className={`${dot} stroke-white dark:stroke-zinc-900`} strokeWidth={1.5} />)}
-        <text x={pl} y={H - 4} className="fill-zinc-400 text-[13px]">{new Date(pts[0].t).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</text>
-        <text x={W - pr} y={H - 4} textAnchor="end" className="fill-zinc-400 text-[13px]">{new Date(pts.at(-1)!.t).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</text>
+        <text x={pl} y={H - 4} className="fill-zinc-400 text-[13px]">{formatLocal(pts[0].t, timeZone, { day: "numeric", month: "short" })}</text>
+        <text x={W - pr} y={H - 4} textAnchor="end" className="fill-zinc-400 text-[13px]">{formatLocal(pts.at(-1)!.t, timeZone, { day: "numeric", month: "short" })}</text>
       </svg>
       {caption && <figcaption className="mt-1 text-xs text-zinc-500">{caption}</figcaption>}
     </figure>

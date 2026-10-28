@@ -38,7 +38,7 @@ export default async function LiveChargingPage({ params }: PageProps<"/bookings/
           </p>
         </section>
       ) : (
-        <LiveCharging reference={ref} initial={initial} canStart={canStart} />
+        <LiveCharging reference={ref} initial={initial} canStart={canStart} serverNow={new Date().getTime()} />
       )}
     </div>
   );

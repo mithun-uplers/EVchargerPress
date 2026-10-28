@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { LIVE_LABEL, TONE_CLS, provenance, secondsAgo, type EvseLive } from "@/lib/live";
 
 /** Charging points with their live status, refreshed every 15 s while the tab is visible. */
-export function EvseLivePanel({ stationId, initial, demoNow }: { stationId: string; initial: EvseLive[]; demoNow?: number }) {
+export function EvseLivePanel({ stationId, initial, serverNow, demoNow }: { stationId: string; initial: EvseLive[]; serverNow: number; demoNow?: number }) {
   const [rows, setRows] = useState(initial);
-  const [now, setNow] = useState(() => demoNow ?? Date.now());
+  // Server clock first, so server HTML and the first client render agree (no hydration mismatch).
+  const [now, setNow] = useState(() => demoNow ?? serverNow);
   const connected = rows.some((r) => r.is_connected);
 
   useEffect(() => {

@@ -25,8 +25,8 @@ export function BarChart({
   return (
     <figure>
       <div className="relative" style={{ height }}>
-        {ticks.map((t) => (
-          <div key={t} className="pointer-events-none absolute inset-x-0 border-t border-dashed border-zinc-200 dark:border-zinc-800" style={{ bottom: `${(t / max) * 100}%` }}>
+        {ticks.map((t, i) => (
+          <div key={i} className="pointer-events-none absolute inset-x-0 border-t border-dashed border-zinc-200 dark:border-zinc-800" style={{ bottom: `${(t / max) * 100}%` }}>
             <span className="absolute -top-2.5 right-0 bg-white pl-1 text-[10px] tabular-nums text-zinc-400 dark:bg-zinc-900">{format(t)}</span>
           </div>
         ))}

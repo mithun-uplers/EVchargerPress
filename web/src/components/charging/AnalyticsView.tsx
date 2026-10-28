@@ -131,8 +131,8 @@ export function AnalyticsView({ a, banner }: { a: Analytics; banner?: ReactNode 
                 <tr><th className="px-1 py-1.5 font-medium">Station</th><th className="px-1 py-1.5 text-right font-medium">Sessions</th><th className="px-1 py-1.5 text-right font-medium">kWh</th><th className="px-1 py-1.5 text-right font-medium">Spent</th><th className="px-1 py-1.5 text-right font-medium">₹/kWh</th></tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                {a.topStations.map((s) => (
-                  <tr key={`${s.title}${s.subtitle}`}>
+                {a.topStations.map((s, i) => (
+                  <tr key={`${i}|${s.title}|${s.subtitle ?? ""}`}>
                     <td className="px-1 py-2"><span className="font-medium">{s.title}</span>{s.subtitle && <span className="block truncate text-xs text-zinc-500">{s.subtitle}</span>}</td>
                     <td className="px-1 py-2 text-right tabular-nums">{s.sessions}</td>
                     <td className="px-1 py-2 text-right tabular-nums">{s.kwh}</td>

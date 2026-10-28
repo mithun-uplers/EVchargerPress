@@ -167,7 +167,7 @@ export default async function PreviewPage({ params, searchParams }: PageProps<"/
           <h1 className="text-2xl font-semibold tracking-tight">Demo Hub — Ahmedabad</h1>
           <p className="text-sm text-zinc-500">DC fast charger 1 · up to 60 kW · Daily driver</p>
         </div>
-        <LiveCharging reference="EV-DEMO7Q2K" initial={previewLive} canStart demo />
+        <LiveCharging reference="EV-DEMO7Q2K" initial={previewLive} canStart serverNow={PREVIEW_NOW.getTime()} demo />
       </div>
     );
   }
@@ -182,7 +182,7 @@ export default async function PreviewPage({ params, searchParams }: PageProps<"/
             <div className="grid h-64 place-items-center rounded-2xl bg-energy-50 text-sm text-energy-800 ring-1 ring-energy-200">Map (OpenStreetMap) appears here</div>
           </div>
           <div className="space-y-4 lg:col-span-2">
-            <EvseLivePanel stationId="preview" initial={previewEvses} demoNow={PREVIEW_NOW.getTime()} />
+            <EvseLivePanel stationId="preview" initial={previewEvses} serverNow={PREVIEW_NOW.getTime()} demoNow={PREVIEW_NOW.getTime()} />
           </div>
         </div>
       </div>

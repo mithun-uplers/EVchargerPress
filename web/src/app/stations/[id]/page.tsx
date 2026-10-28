@@ -119,7 +119,7 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
         </div>
 
         <div className="space-y-4 lg:col-span-2">
-          <EvseLivePanel stationId={station.id} initial={evseLive} />
+          <EvseLivePanel stationId={station.id} initial={evseLive} serverNow={new Date().getTime()} />
           {!canBook && (
             <section className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:bg-zinc-900 dark:ring-zinc-800">
               <h2 className="font-semibold">Online booking isn’t available here</h2>

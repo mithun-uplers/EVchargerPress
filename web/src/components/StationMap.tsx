@@ -153,6 +153,11 @@ export function StationMap({ initialCenter }: { initialCenter?: [number, number]
         }, 300); // debounce while panning
       };
 
+      // The basemap style references a few icons it doesn't ship; supply a transparent 1×1 image
+      // instead of logging "Image could not be loaded" warnings to the console.
+      m.on("styleimagemissing", (e: { id: string }) => {
+        if (!m.hasImage(e.id)) m.addImage(e.id, { width: 1, height: 1, data: new Uint8Array(4) });
+      });
       m.on("load", () => {
         const pin = makePinImage("#437a27");
         m.addImage("pin-bookable", pin.image, { pixelRatio: pin.ratio });

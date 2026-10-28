@@ -37,8 +37,8 @@ function SocProfile({ r }: { r: RouteResult }) {
     <figure>
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Estimated battery level along the route" className="max-h-72 w-full">
         <rect x={pl} y={y(r.inputs.reservePct)} width={W - pl - pr} height={y(0) - y(r.inputs.reservePct)} className="fill-rose-500/10" />
-        {[100, 50, r.inputs.reservePct, 0].map((v) => (
-          <g key={v}>
+        {[...new Set([100, 50, r.inputs.reservePct, 0])].map((v, i) => (
+          <g key={i}>
             <line x1={pl} x2={W - pr} y1={y(v)} y2={y(v)} className="stroke-zinc-200 dark:stroke-zinc-800" strokeDasharray="3 4" />
             <text x={pl - 6} y={y(v) + 4} textAnchor="end" className="fill-zinc-400 text-[13px] tabular-nums">{v}%</text>
           </g>

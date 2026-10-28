@@ -19,6 +19,11 @@ export function RouteMap({ line, stops, straight }: { line: [number, number][]; 
       m.addControl(new maplibre.NavigationControl({ showCompass: false }), "top-right");
       const bounds = line.reduce((b, c) => b.extend(c), new maplibre.LngLatBounds(line[0], line[0]));
       m.fitBounds(bounds, { padding: 40, duration: 0 });
+      // The basemap style references a few icons it doesn't ship; supply a transparent 1×1 image
+      // instead of logging "Image could not be loaded" warnings to the console.
+      m.on("styleimagemissing", (e: { id: string }) => {
+        if (!m.hasImage(e.id)) m.addImage(e.id, { width: 1, height: 1, data: new Uint8Array(4) });
+      });
       m.on("load", () => {
         m.addSource("route", { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: line } } });
         m.addLayer({ id: "route-casing", type: "line", source: "route", paint: { "line-color": "#ffffff", "line-width": 8 }, layout: { "line-cap": "round", "line-join": "round" } });
