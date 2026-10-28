@@ -19,7 +19,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         {signup ? "Report charger status and add stations." : "Welcome back to EVChargePress."}
       </p>
       {s("error") && <p className="mt-4 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">{s("error")}</p>}
-      {s("message") && <p className="mt-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300">{s("message")}</p>}
+      {s("message") && <p className="mt-4 rounded-md bg-energy-50 px-3 py-2 text-sm text-energy-800 dark:bg-energy-500/10 dark:text-energy-300">{s("message")}</p>}
 
       <form action={signup ? signUp : signIn} className="mt-6 space-y-4">
         <input type="hidden" name="next" value={next} />
@@ -39,12 +39,12 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         </label>
         {!signup && (
           <p className="-mt-2 text-right text-sm">
-            <Link href="/forgot-password" className="font-medium text-emerald-700 hover:underline dark:text-emerald-400">
+            <Link href="/forgot-password" className="font-medium text-energy-700 hover:underline dark:text-energy-400">
               Forgot password?
             </Link>
           </p>
         )}
-        <button className="w-full rounded-lg bg-emerald-600 py-2.5 text-sm font-medium text-white hover:bg-emerald-700">
+        <button className="w-full rounded-lg bg-energy-600 py-2.5 text-sm font-medium text-white hover:bg-energy-700">
           {signup ? "Create account" : "Sign in"}
         </button>
       </form>
@@ -53,7 +53,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         {signup ? "Already have an account? " : "New here? "}
         <Link
           href={`/login?${new URLSearchParams({ ...(signup ? {} : { mode: "signup" }), next })}`}
-          className="font-medium text-emerald-700 hover:underline dark:text-emerald-400"
+          className="font-medium text-energy-700 hover:underline dark:text-energy-400"
         >
           {signup ? "Sign in" : "Create an account"}
         </Link>

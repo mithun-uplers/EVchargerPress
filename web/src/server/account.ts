@@ -1,4 +1,6 @@
 import "server-only";
+import { parseRange } from "@/lib/booking-types";
+import type { FinishedBookingInput } from "@/lib/charging-stats";
 import { createClient } from "@/lib/supabase/server";
 
 export type Profile = {
@@ -42,9 +44,9 @@ export type Session = {
   source: "manual" | "operator_api" | "charger_ocpp";
   status: string;
   notes: string | null;
-  booking: { reference: string } | null;
-  vehicle: { make: string; model: string; nickname: string | null } | null;
-  station: { name: string; time_zone: string } | null;
+  booking: { id: string; reference: string } | null;
+  vehicle: { id: string; make: string; model: string; nickname: string | null } | null;
+  station: { name: string; time_zone: string; address: string | null; city: string | null; operator: string | null } | null;
 };
 
 const VEHICLE_COLUMNS =
@@ -90,7 +92,7 @@ export async function listSessions(limit = 100): Promise<Session[]> {
   const { data } = await supabase
     .from("charging_sessions")
     .select(
-      "id,started_at,ended_at,energy_kwh,total_cost_minor,currency,source,status,notes,booking:bookings(reference),vehicle:vehicles(make,model,nickname),station:stations(name,time_zone)",
+      "id,started_at,ended_at,energy_kwh,total_cost_minor,currency,source,status,notes,booking:bookings(id,reference),vehicle:vehicles(id,make,model,nickname),station:stations(name,time_zone,address,city,operator)",
     )
     .order("started_at", { ascending: false })
     .limit(limit);
@@ -109,20 +111,43 @@ export async function sessionCandidateBookings() {
   return (data ?? []) as unknown as { id: string; reference: string; period: string; status: string; station: { name: string } | null }[];
 }
 
-/** Monthly totals over the sessions the user has, newest month first. */
-export function monthlyTotals(sessions: Session[], months = 6, now = new Date()) {
-  const keys: string[] = [];
-  for (let i = months - 1; i >= 0; i--) {
-    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
-    keys.push(`${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`);
-  }
-  const totals = new Map(keys.map((k) => [k, { month: k, energy_kwh: 0, cost_minor: 0, sessions: 0 }]));
-  for (const s of sessions) {
-    const t = totals.get(s.started_at.slice(0, 7));
-    if (!t) continue;
-    t.sessions += 1;
-    t.energy_kwh += Number(s.energy_kwh ?? 0);
-    t.cost_minor += Number(s.total_cost_minor ?? 0);
-  }
-  return keys.map((k) => totals.get(k)!);
+
+/** Completed bookings (newest first) — those without a recorded session show as estimates in history. */
+export async function listFinishedBookings(limit = 100): Promise<FinishedBookingInput[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("bookings")
+    .select("id,reference,period,currency,estimated_total_minor,price_snapshot,station:stations(name,time_zone,address,city,operator),vehicle:vehicles(id,make,model,nickname)")
+    .eq("status", "completed")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  type Row = {
+    id: string; reference: string; period: string; currency: string; estimated_total_minor: number;
+    price_snapshot: { assumptions?: { estimated_kwh?: number } } | null;
+    station: FinishedBookingInput["station"]; vehicle: FinishedBookingInput["vehicle"];
+  };
+  return ((data ?? []) as unknown as Row[]).map((b) => {
+    const { start, end } = parseRange(b.period);
+    const kwh = b.price_snapshot?.assumptions?.estimated_kwh;
+    return {
+      id: b.id, reference: b.reference, start: start.toISOString(), end: end.toISOString(), currency: b.currency,
+      estimatedTotalMinor: b.estimated_total_minor, estimatedKwh: typeof kwh === "number" ? kwh : null,
+      station: b.station, vehicle: b.vehicle,
+    };
+  });
+}
+
+/** Most recent manual reading per vehicle (for the vehicles list). */
+export async function latestReadings(vehicleIds: string[]): Promise<Record<string, BatteryReading>> {
+  if (vehicleIds.length === 0) return {};
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("battery_readings")
+    .select("id,vehicle_id,recorded_at,soc_percent,odometer_km,source,notes")
+    .in("vehicle_id", vehicleIds)
+    .order("recorded_at", { ascending: false })
+    .limit(200);
+  const out: Record<string, BatteryReading> = {};
+  for (const r of (data ?? []) as (BatteryReading & { vehicle_id: string })[]) if (!out[r.vehicle_id]) out[r.vehicle_id] = r;
+  return out;
 }

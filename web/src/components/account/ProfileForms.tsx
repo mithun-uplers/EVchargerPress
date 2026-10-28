@@ -49,18 +49,18 @@ export function PreferencesForm({ profile, vehicles }: { profile: P; vehicles: {
         <div className="mt-2 flex gap-4 text-sm">
           {["km", "mi"].map((u) => (
             <label key={u} className="flex items-center gap-2">
-              <input type="radio" name="distance_unit" value={u} defaultChecked={profile.distance_unit === u} className="accent-emerald-600" />
+              <input type="radio" name="distance_unit" value={u} defaultChecked={profile.distance_unit === u} className="accent-energy-600" />
               {u === "km" ? "Kilometres" : "Miles"}
             </label>
           ))}
         </div>
       </fieldset>
       <label className="flex items-start gap-3 text-sm">
-        <input type="checkbox" name="email_reminders" defaultChecked={profile.email_reminders} className="mt-0.5 h-4 w-4 accent-emerald-600" />
+        <input type="checkbox" name="email_reminders" defaultChecked={profile.email_reminders} className="mt-0.5 h-4 w-4 accent-energy-600" />
         <span>Email me booking confirmations and reminders</span>
       </label>
       <label className="flex items-start gap-3 text-sm">
-        <input type="checkbox" name="share_location" defaultChecked={profile.share_location} className="mt-0.5 h-4 w-4 accent-emerald-600" />
+        <input type="checkbox" name="share_location" defaultChecked={profile.share_location} className="mt-0.5 h-4 w-4 accent-energy-600" />
         <span>
           Use my location to show nearby chargers
           <span className="block text-xs text-zinc-500">Your browser still asks for permission. We don’t store your location.</span>

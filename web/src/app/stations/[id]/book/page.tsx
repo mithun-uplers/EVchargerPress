@@ -15,7 +15,7 @@ function Step({ n, title, children }: { n: number; title: string; children: Reac
   return (
     <section aria-labelledby={`step-${n}`} className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
       <h2 id={`step-${n}`} className="flex items-center gap-2 font-medium">
-        <span aria-hidden="true" className="grid h-6 w-6 place-items-center rounded-full bg-emerald-600 text-xs font-semibold text-white">{n}</span>
+        <span aria-hidden="true" className="grid h-6 w-6 place-items-center rounded-full bg-energy-600 text-xs font-semibold text-white">{n}</span>
         {title}
       </h2>
       <div className="mt-3">{children}</div>
@@ -44,8 +44,8 @@ export default async function BookPage({ params, searchParams }: PageProps<"/sta
         <h1 className="text-xl font-semibold">{station.name} doesn’t take online bookings</h1>
         <p className="mt-2 text-sm text-zinc-500">You can still see its details and drivers’ reports.</p>
         <div className="mt-4 flex justify-center gap-3">
-          <Link href={`/stations/${id}`} className="text-sm font-medium text-emerald-700 hover:underline">Back to station</Link>
-          <Link href="/?bookable=1" className="text-sm font-medium text-emerald-700 hover:underline">Find bookable stations</Link>
+          <Link href={`/stations/${id}`} className="text-sm font-medium text-energy-700 hover:underline">Back to station</Link>
+          <Link href="/?bookable=1" className="text-sm font-medium text-energy-700 hover:underline">Find bookable stations</Link>
         </div>
       </div>
     );
@@ -112,13 +112,13 @@ export default async function BookPage({ params, searchParams }: PageProps<"/sta
       <Step n={1} title="Your vehicle">
         {!user ? (
           <p className="text-sm">
-            <Link href={`/login?next=${encodeURIComponent(back)}`} className="font-medium text-emerald-700 hover:underline">Sign in</Link> to pick your
+            <Link href={`/login?next=${encodeURIComponent(back)}`} className="font-medium text-energy-700 hover:underline">Sign in</Link> to pick your
             vehicle — we’ll only show charging points it can plug into. You can browse times below meanwhile.
           </p>
         ) : vehicles.length === 0 ? (
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-500/10 dark:text-amber-200">
             <span>Add your vehicle so we can check connector compatibility and estimate the price.</span>
-            <Link href={`/vehicles/new?back=${encodeURIComponent(`/stations/${id}/book?date=${date}&duration=${duration}`)}`} className="inline-flex min-h-10 items-center rounded-lg bg-emerald-600 px-3 font-medium text-white hover:bg-emerald-700">
+            <Link href={`/vehicles/new?back=${encodeURIComponent(`/stations/${id}/book?date=${date}&duration=${duration}`)}`} className="inline-flex min-h-10 items-center rounded-lg bg-energy-600 px-3 font-medium text-white hover:bg-energy-700">
               Add vehicle
             </Link>
           </div>
@@ -135,7 +135,7 @@ export default async function BookPage({ params, searchParams }: PageProps<"/sta
               </select>
             </label>
             <button className="min-h-11 rounded-lg px-4 text-sm font-medium ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 dark:ring-zinc-700 dark:hover:bg-zinc-800">Use this vehicle</button>
-            <Link href={`/vehicles/new?back=${encodeURIComponent(`/stations/${id}/book?date=${date}&duration=${duration}`)}`} className="min-h-11 content-center text-sm font-medium text-emerald-700 hover:underline">+ Add another</Link>
+            <Link href={`/vehicles/new?back=${encodeURIComponent(`/stations/${id}/book?date=${date}&duration=${duration}`)}`} className="min-h-11 content-center text-sm font-medium text-energy-700 hover:underline">+ Add another</Link>
           </form>
         )}
         {vehicle && incompatible.length > 0 && (
@@ -154,7 +154,7 @@ export default async function BookPage({ params, searchParams }: PageProps<"/sta
               {days.map((d) => (
                 <label key={d} className="cursor-pointer">
                   <input type="radio" name="date" value={d} defaultChecked={d === date} className="peer sr-only" />
-                  <span className="block min-w-16 rounded-lg border border-zinc-300 px-3 py-2 text-center text-sm peer-checked:border-emerald-600 peer-checked:bg-emerald-50 peer-checked:font-medium peer-focus-visible:outline-2 peer-focus-visible:outline-emerald-600 dark:border-zinc-700 dark:peer-checked:bg-emerald-500/10">
+                  <span className="block min-w-16 rounded-lg border border-zinc-300 px-3 py-2 text-center text-sm peer-checked:border-energy-600 peer-checked:bg-energy-50 peer-checked:font-medium peer-focus-visible:outline-2 peer-focus-visible:outline-energy-600 dark:border-zinc-700 dark:peer-checked:bg-energy-500/10">
                     {formatLocal(`${d}T12:00:00Z`, "UTC", { weekday: "short" })}
                     <span className="block text-xs text-zinc-500">{formatLocal(`${d}T12:00:00Z`, "UTC", { day: "numeric", month: "short" })}</span>
                   </span>

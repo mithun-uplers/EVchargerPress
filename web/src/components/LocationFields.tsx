@@ -35,7 +35,7 @@ export function LocationFields() {
         </label>
       </div>
       <div className="mt-2 flex items-center gap-3">
-        <button type="button" onClick={useMine} className="text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400">
+        <button type="button" onClick={useMine} className="text-sm font-medium text-energy-700 hover:underline dark:text-energy-400">
           Use my current location
         </button>
         {msg && <span className="text-xs text-zinc-500">{msg}</span>}

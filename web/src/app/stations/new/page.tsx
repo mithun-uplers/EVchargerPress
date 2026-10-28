@@ -79,7 +79,7 @@ export default async function NewStationPage({ searchParams }: PageProps<"/stati
           </label>
         </fieldset>
 
-        <button className="w-full rounded-lg bg-emerald-600 py-2.5 text-sm font-medium text-white hover:bg-emerald-700">Save station</button>
+        <button className="w-full rounded-lg bg-energy-600 py-2.5 text-sm font-medium text-white hover:bg-energy-700">Save station</button>
       </form>
     </div>
   );

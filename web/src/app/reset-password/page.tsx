@@ -17,7 +17,7 @@ export default async function ResetPasswordPage({ searchParams }: PageProps<"/re
       <div className="mx-auto max-w-sm py-8">
         <h1 className="text-2xl font-semibold tracking-tight">Link expired</h1>
         <p className="mt-2 text-sm text-zinc-500">Open the reset link from your latest email, or request a new one.</p>
-        <Link href="/forgot-password" className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
+        <Link href="/forgot-password" className="mt-4 inline-block rounded-lg bg-energy-600 px-4 py-2 text-sm font-medium text-white hover:bg-energy-700">
           Request a new link
         </Link>
       </div>
@@ -38,7 +38,7 @@ export default async function ResetPasswordPage({ searchParams }: PageProps<"/re
           Confirm new password
           <input name="confirm" type="password" required minLength={8} autoComplete="new-password" className={input} />
         </label>
-        <button className="w-full rounded-lg bg-emerald-600 py-2.5 text-sm font-medium text-white hover:bg-emerald-700">Update password</button>
+        <button className="w-full rounded-lg bg-energy-600 py-2.5 text-sm font-medium text-white hover:bg-energy-700">Update password</button>
       </form>
     </div>
   );

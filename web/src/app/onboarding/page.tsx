@@ -39,7 +39,7 @@ export default async function OnboardingPage() {
           <h2 className="font-medium">2. Your vehicle</h2>
           <p className="mt-1 text-sm text-zinc-500">We use its connector types to show only chargers you can plug into.</p>
           {vehicles.length === 0 ? (
-            <Link href="/vehicles/new?back=/onboarding" className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-emerald-600 px-4 text-sm font-medium text-white hover:bg-emerald-700">
+            <Link href="/vehicles/new?back=/onboarding" className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-energy-600 px-4 text-sm font-medium text-white hover:bg-energy-700">
               Add your vehicle
             </Link>
           ) : (
@@ -50,7 +50,7 @@ export default async function OnboardingPage() {
                   <option key={v.id} value={v.id}>{vehicleLabel(v)}</option>
                 ))}
               </select>
-              <Link href="/vehicles/new?back=/onboarding" className="mt-2 inline-block text-sm font-medium text-emerald-700 hover:underline">+ Add another</Link>
+              <Link href="/vehicles/new?back=/onboarding" className="mt-2 inline-block text-sm font-medium text-energy-700 hover:underline">+ Add another</Link>
             </label>
           )}
         </section>
@@ -62,7 +62,7 @@ export default async function OnboardingPage() {
         </section>
 
         <div className="flex flex-wrap gap-3">
-          <button className="min-h-11 rounded-lg bg-emerald-600 px-5 text-sm font-medium text-white hover:bg-emerald-700">Finish</button>
+          <button className="min-h-11 rounded-lg bg-energy-600 px-5 text-sm font-medium text-white hover:bg-energy-700">Finish</button>
           <Link href="/" className="inline-flex min-h-11 items-center px-3 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white">Skip for now</Link>
         </div>
       </form>

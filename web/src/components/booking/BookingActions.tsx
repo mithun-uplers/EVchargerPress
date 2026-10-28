@@ -42,7 +42,7 @@ export function ConfirmButton({ reference }: { reference: string }) {
   return (
     <form action={action} className="space-y-2">
       <input type="hidden" name="reference" value={reference} />
-      <button disabled={pending} className="min-h-11 w-full rounded-lg bg-emerald-600 px-5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60">
+      <button disabled={pending} className="min-h-11 w-full rounded-lg bg-energy-600 px-5 text-sm font-medium text-white hover:bg-energy-700 disabled:opacity-60">
         {pending ? "Confirming…" : "Confirm booking"}
       </button>
       <Feedback state={state} />
@@ -55,7 +55,7 @@ export function CheckInButton({ reference }: { reference: string }) {
   return (
     <form action={action} className="space-y-2">
       <input type="hidden" name="reference" value={reference} />
-      <button disabled={pending} className="min-h-11 w-full rounded-lg bg-emerald-600 px-5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60">
+      <button disabled={pending} className="min-h-11 w-full rounded-lg bg-energy-600 px-5 text-sm font-medium text-white hover:bg-energy-700 disabled:opacity-60">
         {pending ? "Checking in…" : "I’ve arrived — check in"}
       </button>
       <Feedback state={state} />

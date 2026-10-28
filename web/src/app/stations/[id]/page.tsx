@@ -86,7 +86,7 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
             </p>
           )}
         </div>
-        <a href={directions} target="_blank" rel="noreferrer" className="rounded-lg bg-emerald-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-emerald-700">
+        <a href={directions} target="_blank" rel="noreferrer" className="rounded-lg bg-energy-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-energy-700">
           Get directions
         </a>
       </div>
@@ -151,16 +151,16 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
                   ? "This station comes from OpenStreetMap. We don’t have verified charging points, opening hours or prices for it, so we don’t take bookings — turn up and charge as usual."
                   : "The operator hasn’t published bookable charging points, opening hours and prices for this station yet."}
               </p>
-              <Link href="/?bookable=1" className="mt-3 inline-flex min-h-11 items-center rounded-lg px-4 text-sm font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200 hover:bg-emerald-50 dark:text-emerald-400 dark:ring-emerald-500/30">
+              <Link href="/?bookable=1" className="mt-3 inline-flex min-h-11 items-center rounded-lg px-4 text-sm font-medium text-energy-700 ring-1 ring-inset ring-energy-200 hover:bg-energy-50 dark:text-energy-400 dark:ring-energy-500/30">
                 Find bookable stations
               </Link>
             </section>
           )}
           {canBook && (
-            <section className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/10">
+            <section className="rounded-xl border border-energy-200 bg-energy-50 p-4 dark:border-energy-500/30 dark:bg-energy-500/10">
               <h2 className="font-medium">Reserve a charging slot</h2>
               <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Pick a time, see the full price, then confirm. Free cancellation up to the cut-off.</p>
-              <Link href={`/stations/${station.id}/book`} className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-emerald-600 px-4 text-sm font-medium text-white hover:bg-emerald-700">
+              <Link href={`/stations/${station.id}/book`} className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-energy-600 px-4 text-sm font-medium text-white hover:bg-energy-700">
                 Book a slot
               </Link>
             </section>
@@ -175,7 +175,7 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
                   {(["working", "busy", "broken"] as const).map((s, i) => (
                     <label key={s} className="cursor-pointer">
                       <input type="radio" name="status" value={s} defaultChecked={i === 0} className="peer sr-only" />
-                      <span className="block rounded-lg border border-zinc-300 px-2 py-2 text-center text-sm capitalize peer-checked:border-emerald-600 peer-checked:bg-emerald-50 peer-checked:font-medium dark:border-zinc-700 dark:peer-checked:bg-emerald-500/10">
+                      <span className="block rounded-lg border border-zinc-300 px-2 py-2 text-center text-sm capitalize peer-checked:border-energy-600 peer-checked:bg-energy-50 peer-checked:font-medium dark:border-zinc-700 dark:peer-checked:bg-energy-500/10">
                         {s}
                       </span>
                     </label>
@@ -194,7 +194,7 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
               </form>
             ) : (
               <p className="mt-2 text-sm text-zinc-500">
-                <Link href={`/login?next=/stations/${station.id}`} className="font-medium text-emerald-700 hover:underline dark:text-emerald-400">
+                <Link href={`/login?next=/stations/${station.id}`} className="font-medium text-energy-700 hover:underline dark:text-energy-400">
                   Sign in
                 </Link>{" "}
                 to report whether this charger is working.

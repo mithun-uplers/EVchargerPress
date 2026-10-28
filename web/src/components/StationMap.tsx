@@ -9,7 +9,7 @@ const STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
 const INDIA = { center: [78.9629, 22.5937] as [number, number], zoom: 4.2 };
 
 /** Draws the round charger pin (emerald circle, white bolt) used for each station. */
-function makePinImage(fill = "#059669", size = 40, ratio = 2) {
+function makePinImage(fill = "#437a27", size = 40, ratio = 2) {
   const px = size * ratio;
   const canvas = document.createElement("canvas");
   canvas.width = px;
@@ -60,7 +60,7 @@ function popupContent(p: Record<string, unknown>) {
   ].join(" · ");
   root.appendChild(meta);
   const badge = document.createElement("p");
-  badge.className = Number(p.bookable) === 1 ? "mt-1 text-xs font-semibold text-emerald-700" : "mt-1 text-xs text-zinc-500";
+  badge.className = Number(p.bookable) === 1 ? "mt-1 text-xs font-semibold text-energy-700" : "mt-1 text-xs text-zinc-500";
   badge.textContent = Number(p.bookable) === 1 ? "Online booking available" : "Information only — no online booking";
   root.appendChild(badge);
   if (p.source === "openstreetmap") {
@@ -71,13 +71,13 @@ function popupContent(p: Record<string, unknown>) {
   }
   const link = document.createElement("a");
   link.href = `/stations/${String(p.id)}`;
-  link.className = "mt-2 inline-block text-sm font-medium text-emerald-700 hover:underline";
+  link.className = "mt-2 inline-block text-sm font-medium text-energy-700 hover:underline";
   link.textContent = "View details →";
   root.appendChild(link);
   if (Number(p.bookable) === 1) {
     const book = document.createElement("a");
     book.href = `/stations/${String(p.id)}/book`;
-    book.className = "ml-3 mt-2 inline-block text-sm font-semibold text-emerald-700 hover:underline";
+    book.className = "ml-3 mt-2 inline-block text-sm font-semibold text-energy-700 hover:underline";
     book.textContent = "Book a slot →";
     root.appendChild(book);
   }
@@ -148,7 +148,7 @@ export function StationMap({ initialCenter }: { initialCenter?: [number, number]
       };
 
       m.on("load", () => {
-        const pin = makePinImage("#059669");
+        const pin = makePinImage("#437a27");
         m.addImage("pin-bookable", pin.image, { pixelRatio: pin.ratio });
         const info = makePinImage("#64748b");
         m.addImage("pin-info", info.image, { pixelRatio: info.ratio });
@@ -165,7 +165,7 @@ export function StationMap({ initialCenter }: { initialCenter?: [number, number]
           source: "stations",
           filter: ["has", "point_count"],
           paint: {
-            "circle-color": "#047857",
+            "circle-color": "#355f20",
             "circle-opacity": 0.9,
             "circle-stroke-color": "#ffffff",
             "circle-stroke-width": 2,
@@ -246,7 +246,7 @@ export function StationMap({ initialCenter }: { initialCenter?: [number, number]
           </span>
         )}
         <span className="pointer-events-auto flex items-center gap-3 rounded-full bg-white/95 px-3 py-1 text-xs text-zinc-700 shadow">
-          <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-emerald-600" />Bookable</span>
+          <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-energy-600" />Bookable</span>
           <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-slate-500" />Info only</span>
         </span>
         {loadError && (
@@ -259,7 +259,7 @@ export function StationMap({ initialCenter }: { initialCenter?: [number, number]
         <div role="alert" className="absolute inset-x-3 bottom-20 mx-auto max-w-md rounded-xl bg-white p-4 text-sm text-zinc-800 shadow-lg">
           <p className="font-medium">Location unavailable</p>
           <p className="mt-1 text-zinc-600">{notice}</p>
-          <button onClick={() => setNotice(null)} className="mt-2 text-sm font-medium text-emerald-700">
+          <button onClick={() => setNotice(null)} className="mt-2 text-sm font-medium text-energy-700">
             Dismiss
           </button>
         </div>

@@ -5,6 +5,47 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/*
+ * Energy theme.
+ * energy-*: leaf green brand scale. energy-600 is the primary action colour
+ *   (5.2:1 contrast with white text, WCAG AA); energy-700 for links on white (7.4:1).
+ * charge-*: amber for "power flowing" — chart bars, battery fill, live/charging states.
+ * canvas: soft green-tinted page background behind white cards.
+ */
+@theme {
+  --color-energy-50: #f2f8ec;
+  --color-energy-100: #e2f0d3;
+  --color-energy-200: #c6e2a8;
+  --color-energy-300: #a2cf74;
+  --color-energy-400: #7fb94f;
+  --color-energy-500: #5f9d36;
+  --color-energy-600: #437a27;
+  --color-energy-700: #355f20;
+  --color-energy-800: #2b4c1c;
+  --color-energy-900: #233e18;
+  --color-energy-950: #10230a;
+
+  --color-charge-50: #fff8e1;
+  --color-charge-100: #ffefb3;
+  --color-charge-200: #ffe27a;
+  --color-charge-300: #ffd54d;
+  --color-charge-400: #f5b800;
+  --color-charge-500: #dc9f00;
+  --color-charge-600: #b07c00;
+
+  --color-canvas: #f4f6f1;
+}
+
 body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Respect reduced motion for transitions used on toggles and bars. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+/* Striped fill marks estimated (not recorded) values in charts. */
+.bar-estimate {
+  background-image: repeating-linear-gradient(135deg, transparent 0 3px, rgb(245 184 0 / 0.45) 3px 5px);
 }

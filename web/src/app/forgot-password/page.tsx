@@ -15,7 +15,7 @@ export default async function ForgotPasswordPage({ searchParams }: PageProps<"/f
     <div className="mx-auto max-w-sm py-8">
       <h1 className="text-2xl font-semibold tracking-tight">Reset your password</h1>
       {sent ? (
-        <div className="mt-4 rounded-md bg-emerald-50 px-3 py-3 text-sm text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300">
+        <div className="mt-4 rounded-md bg-energy-50 px-3 py-3 text-sm text-energy-800 dark:bg-energy-500/10 dark:text-energy-300">
           If an account exists for that email, we’ve sent a link to reset the password. It expires in 1 hour. Check your spam folder if it doesn’t arrive.
         </div>
       ) : (
@@ -27,12 +27,12 @@ export default async function ForgotPasswordPage({ searchParams }: PageProps<"/f
               Email
               <input name="email" type="email" required autoComplete="email" className={input} />
             </label>
-            <button className="w-full rounded-lg bg-emerald-600 py-2.5 text-sm font-medium text-white hover:bg-emerald-700">Send reset link</button>
+            <button className="w-full rounded-lg bg-energy-600 py-2.5 text-sm font-medium text-white hover:bg-energy-700">Send reset link</button>
           </form>
         </>
       )}
       <p className="mt-6 text-center text-sm text-zinc-500">
-        <Link href="/login" className="font-medium text-emerald-700 hover:underline dark:text-emerald-400">Back to sign in</Link>
+        <Link href="/login" className="font-medium text-energy-700 hover:underline dark:text-energy-400">Back to sign in</Link>
       </p>
     </div>
   );

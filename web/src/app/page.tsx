@@ -66,13 +66,13 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   return (
     <div className="space-y-6">
       {message && (
-        <p role="status" className="rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300">
+        <p role="status" className="rounded-md bg-energy-50 px-3 py-2 text-sm text-energy-800 dark:bg-energy-500/10 dark:text-energy-300">
           {message}
         </p>
       )}
-      <section className="rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 px-6 py-8 text-white">
+      <section className="rounded-2xl bg-gradient-to-br from-energy-700 via-energy-600 to-energy-800 px-6 py-8 text-white">
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Find a charger that actually works.</h1>
-        <p className="mt-2 max-w-xl text-emerald-50/90">
+        <p className="mt-2 max-w-xl text-energy-50/90">
           Search stations by city, PIN code or name, filter by connector, and see what other drivers reported recently.
         </p>
         <form className="mt-5 flex flex-col gap-2 sm:flex-row" action="/">
@@ -107,9 +107,9 @@ export default async function Home({ searchParams }: PageProps<"/">) {
       </section>
 
       {user && profile && !profile.onboarded_at && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm dark:border-emerald-500/30 dark:bg-emerald-500/10">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-energy-200 bg-energy-50 p-4 text-sm dark:border-energy-500/30 dark:bg-energy-500/10">
           <span>Finish setting up: add your vehicle so we only show chargers it can use.</span>
-          <Link href="/onboarding" className="inline-flex min-h-10 items-center rounded-lg bg-emerald-600 px-3 font-medium text-white hover:bg-emerald-700">Continue setup</Link>
+          <Link href="/onboarding" className="inline-flex min-h-10 items-center rounded-lg bg-energy-600 px-3 font-medium text-white hover:bg-energy-700">Continue setup</Link>
         </div>
       )}
 
@@ -119,7 +119,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             <strong>Online booking</strong> is available at {bookableCount} station{bookableCount === 1 ? "" : "s"} so far. Other stations come from
             OpenStreetMap or drivers and are information only until an operator publishes chargers and prices.
           </span>
-          <Link href="/?bookable=1" className="inline-flex min-h-10 items-center rounded-lg bg-emerald-600 px-3 font-medium text-white hover:bg-emerald-700">Show bookable</Link>
+          <Link href="/?bookable=1" className="inline-flex min-h-10 items-center rounded-lg bg-energy-600 px-3 font-medium text-white hover:bg-energy-700">Show bookable</Link>
         </div>
       )}
 
@@ -148,7 +148,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           <p className="font-medium">No stations match.</p>
           <p className="mt-1 text-sm text-zinc-500">
             Know one nearby?{" "}
-            <Link href="/stations/new" className="font-medium text-emerald-700 hover:underline dark:text-emerald-400">
+            <Link href="/stations/new" className="font-medium text-energy-700 hover:underline dark:text-energy-400">
               Add it
             </Link>
             .
@@ -160,7 +160,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             <li key={s.id}>
               <Link
                 href={`/stations/${s.id}`}
-                className="block h-full rounded-xl border border-zinc-200 bg-white p-4 transition hover:border-emerald-500 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+                className="block h-full rounded-xl border border-zinc-200 bg-white p-4 transition hover:border-energy-500 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -169,7 +169,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1">
                     {s.is_bookable ? (
-                      <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-xs font-medium text-white">Bookable</span>
+                      <span className="rounded-full bg-energy-600 px-2 py-0.5 text-xs font-medium text-white">Bookable</span>
                     ) : (
                       <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">Info only</span>
                     )}

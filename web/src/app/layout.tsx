@@ -19,7 +19,7 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1, view
 function Logo() {
   return (
     <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-      <span aria-hidden="true" className="grid h-8 w-8 place-items-center rounded-lg bg-emerald-600 text-white">⚡</span>
+      <span aria-hidden="true" className="grid h-8 w-8 place-items-center rounded-lg bg-energy-600 text-white">⚡</span>
       EVChargePress
     </Link>
   );
@@ -28,7 +28,7 @@ function Logo() {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+      <body className="min-h-full bg-canvas text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:shadow">
           Skip to content
         </a>

@@ -6,7 +6,7 @@ export async function UserMenu({ compact = false }: { compact?: boolean }) {
   const user = await getCurrentUser();
   if (!user) {
     return (
-      <Link href="/login" className="inline-flex min-h-10 items-center rounded-lg bg-emerald-600 px-3 text-sm font-medium text-white hover:bg-emerald-700">
+      <Link href="/login" className="inline-flex min-h-10 items-center rounded-lg bg-energy-600 px-3 text-sm font-medium text-white hover:bg-energy-700">
         Sign in
       </Link>
     );

@@ -27,7 +27,7 @@ export function SidebarNav() {
             aria-current={active ? "page" : undefined}
             className={`flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition ${
               active
-                ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300"
+                ? "bg-energy-50 text-energy-800 dark:bg-energy-500/10 dark:text-energy-300"
                 : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
             }`}
           >
@@ -64,7 +64,7 @@ export function BottomNav() {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={`flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-medium ${
-                  active ? "text-emerald-700 dark:text-emerald-400" : "text-zinc-500 dark:text-zinc-400"
+                  active ? "text-energy-700 dark:text-energy-400" : "text-zinc-500 dark:text-zinc-400"
                 }`}
               >
                 <Icon />

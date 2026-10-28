@@ -66,7 +66,7 @@ export default async function BookingPage({ params }: PageProps<"/bookings/[ref]
       {status === "expired" && (
         <div className="rounded-xl border border-zinc-300 bg-zinc-50 p-4 text-sm dark:border-zinc-700 dark:bg-zinc-900">
           This hold expired before it was confirmed, so the slot was released.{" "}
-          {b.station && <Link href={`/stations/${b.station.id}/book`} className="font-medium text-emerald-700 hover:underline">Choose a new slot</Link>}
+          {b.station && <Link href={`/stations/${b.station.id}/book`} className="font-medium text-energy-700 hover:underline">Choose a new slot</Link>}
         </div>
       )}
       {status === "cancelled" && (

@@ -67,10 +67,10 @@ export function SlotPicker({ stationId, timeZone, durationMin, slots, evses, bac
                     role="radio"
                     aria-checked={active}
                     onClick={() => choose(e.id, s)}
-                    className={`min-h-11 rounded-lg border px-2 py-2 text-sm tabular-nums transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 ${
+                    className={`min-h-11 rounded-lg border px-2 py-2 text-sm tabular-nums transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-energy-600 ${
                       active
-                        ? "border-emerald-600 bg-emerald-600 font-semibold text-white"
-                        : "border-zinc-300 hover:border-emerald-500 hover:bg-emerald-50 dark:border-zinc-700 dark:hover:bg-emerald-500/10"
+                        ? "border-energy-600 bg-energy-600 font-semibold text-white"
+                        : "border-zinc-300 hover:border-energy-500 hover:bg-energy-50 dark:border-zinc-700 dark:hover:bg-energy-500/10"
                     }`}
                   >
                     {formatTime(s.slot_start, timeZone)}
@@ -107,7 +107,7 @@ export function SlotPicker({ stationId, timeZone, durationMin, slots, evses, bac
           </p>
           <button
             disabled={!selected || pending}
-            className="min-h-11 rounded-lg bg-emerald-600 px-5 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-11 rounded-lg bg-energy-600 px-5 text-sm font-medium text-white hover:bg-energy-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {pending ? "Holding…" : signedIn ? "Hold this slot" : "Sign in to book"}
           </button>

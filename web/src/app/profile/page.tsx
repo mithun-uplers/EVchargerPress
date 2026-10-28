@@ -29,7 +29,7 @@ export default async function ProfilePage() {
       <Card title="Account">
         <AccountForm email={user.email} profile={profile} />
         <div className="mt-4 flex flex-wrap gap-3 border-t border-zinc-100 pt-4 text-sm dark:border-zinc-800">
-          <Link href="/reset-password" className="font-medium text-emerald-700 hover:underline dark:text-emerald-400">Change password</Link>
+          <Link href="/reset-password" className="font-medium text-energy-700 hover:underline dark:text-energy-400">Change password</Link>
           <form action={signOut}><button className="font-medium text-zinc-600 hover:underline dark:text-zinc-300">Sign out</button></form>
         </div>
       </Card>

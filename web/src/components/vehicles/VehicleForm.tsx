@@ -3,16 +3,10 @@
 import { useActionState, useState } from "react";
 import { saveVehicle, type FormState } from "@/app/account/actions";
 import { FormMessage, SubmitButton, inputCls } from "@/components/forms";
+import { VEHICLE_TYPE_LABEL } from "@/lib/vehicle-types";
 import { CONNECTOR_TYPES } from "@/lib/types";
 import type { Vehicle } from "@/server/account";
 
-export const VEHICLE_TYPE_LABEL: Record<string, string> = {
-  car: "Electric car",
-  motorcycle: "Electric motorcycle",
-  scooter: "Electric scooter",
-  bicycle: "Electric bicycle",
-  other: "Other electric vehicle",
-};
 
 const HINT: Record<string, string> = {
   CCS2: "DC fast charging — most new cars in India",
@@ -101,9 +95,9 @@ export function VehicleForm({ vehicle, back }: { vehicle?: Vehicle; back?: strin
           {CONNECTOR_TYPES.map((t) => {
             const on = selected.has(t);
             return (
-              <div key={t} className={`rounded-lg border p-3 ${on ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-500/5" : "border-zinc-200 dark:border-zinc-800"}`}>
+              <div key={t} className={`rounded-lg border p-3 ${on ? "border-energy-600 bg-energy-50/50 dark:bg-energy-500/5" : "border-zinc-200 dark:border-zinc-800"}`}>
                 <label className="flex cursor-pointer items-start gap-3">
-                  <input type="checkbox" name="connector_types" value={t} checked={on} onChange={() => toggle(t)} className="mt-1 h-4 w-4 accent-emerald-600" />
+                  <input type="checkbox" name="connector_types" value={t} checked={on} onChange={() => toggle(t)} className="mt-1 h-4 w-4 accent-energy-600" />
                   <span>
                     <span className="block text-sm font-medium">{t}</span>
                     <span className="block text-xs text-zinc-500">{HINT[t]}</span>
