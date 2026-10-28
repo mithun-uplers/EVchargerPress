@@ -2,6 +2,7 @@
 
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef } from "react";
+import { loadMaplibre } from "@/lib/maplibre";
 
 const STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
 
@@ -12,7 +13,7 @@ export function RouteMap({ line, stops, straight }: { line: [number, number][]; 
     let map: import("maplibre-gl").Map | null = null;
     let cancelled = false;
     (async () => {
-      const maplibre = await import("maplibre-gl");
+      const maplibre = await loadMaplibre();
       if (cancelled || !el.current) return;
       const m = new maplibre.Map({ container: el.current, style: STYLE_URL, attributionControl: { compact: true } });
       map = m;

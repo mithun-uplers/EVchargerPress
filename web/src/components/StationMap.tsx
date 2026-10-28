@@ -4,6 +4,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
 import type { GeoJSONSource, Map as MapLibreMap, MapLayerMouseEvent } from "maplibre-gl";
 import { describeGeoError } from "@/lib/geolocation";
+import { loadMaplibre } from "@/lib/maplibre";
 
 const STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
 const INDIA = { center: [78.9629, 22.5937] as [number, number], zoom: 4.2 };
@@ -95,15 +96,17 @@ export function StationMap({ initialCenter }: { initialCenter?: [number, number]
   const [notice, setNotice] = useState<string | null>(null);
   const [count, setCount] = useState<number | null>(null);
   const [loadError, setLoadError] = useState(false);
+  const [stalled, setStalled] = useState(false);
 
   useEffect(() => {
     let map: MapLibreMap | null = null;
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let abort: AbortController | null = null;
+    let watchdog: ReturnType<typeof setTimeout> | undefined;
 
     (async () => {
-      const maplibre = await import("maplibre-gl");
+      const maplibre = await loadMaplibre();
       if (cancelled || !containerRef.current) return;
 
       map = new maplibre.Map({
@@ -114,6 +117,8 @@ export function StationMap({ initialCenter }: { initialCenter?: [number, number]
         attributionControl: false,
       });
       const m = map;
+      // If the map never finishes loading (blocked tiles, worker or WebGL problems), say so instead of showing an empty map.
+      watchdog = setTimeout(() => setStalled(true), 20000);
       m.addControl(new maplibre.NavigationControl({ showCompass: false }), "bottom-right");
       const geo = new maplibre.GeolocateControl({
         positionOptions: { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
@@ -159,6 +164,8 @@ export function StationMap({ initialCenter }: { initialCenter?: [number, number]
         if (!m.hasImage(e.id)) m.addImage(e.id, { width: 1, height: 1, data: new Uint8Array(4) });
       });
       m.on("load", () => {
+        clearTimeout(watchdog);
+        setStalled(false);
         const pin = makePinImage("#437a27");
         m.addImage("pin-bookable", pin.image, { pixelRatio: pin.ratio });
         const info = makePinImage("#64748b");
@@ -242,6 +249,7 @@ export function StationMap({ initialCenter }: { initialCenter?: [number, number]
     return () => {
       cancelled = true;
       clearTimeout(timer);
+      clearTimeout(watchdog);
       abort?.abort();
       map?.remove();
     };
@@ -260,6 +268,11 @@ export function StationMap({ initialCenter }: { initialCenter?: [number, number]
           <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-energy-600" />Bookable</span>
           <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-slate-500" />Info only</span>
         </span>
+        {stalled && (
+          <span role="alert" className="pointer-events-auto max-w-xs rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700 shadow">
+            The map didn’t finish loading, so stations can’t be shown. Refresh the page, or use List view.
+          </span>
+        )}
         {loadError && (
           <span className="pointer-events-auto rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700 shadow">
             Couldn’t load stations. Move the map to retry.
