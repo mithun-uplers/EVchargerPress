@@ -44,7 +44,7 @@ export function AccountMenuView({ name, email, initials, compact = false, demo =
       <details className="group relative">
         <summary
           aria-label="Account menu"
-          className="flex min-h-10 list-none items-center gap-2 rounded-full p-0.5 pr-2 ring-1 ring-inset ring-zinc-200 hover:bg-energy-50 dark:ring-zinc-700 [&::-webkit-details-marker]:hidden"
+          className="flex min-h-10 list-none items-center gap-2 rounded-full p-0.5 pr-2 ring-1 ring-inset ring-zinc-200 hover:bg-energy-50 dark:ring-zinc-700 [&::-webkit-details-marker]:hidden dark:hover:bg-energy-500/15"
         >
           <span aria-hidden="true" className="grid h-9 w-9 place-items-center rounded-full bg-energy-600 text-sm font-semibold text-white">{initials}</span>
           <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4 text-zinc-500 transition group-open:rotate-180"><path d="m5 8 5 5 5-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
@@ -63,7 +63,7 @@ export function AccountMenuView({ name, email, initials, compact = false, demo =
             ))}
           </nav>
           <form action={demo ? undefined : signOut} className="border-t border-zinc-100 p-2 dark:border-zinc-800">
-            <button className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-rose-50 text-sm font-semibold text-rose-700 hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-300">
+            <button className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-rose-50 text-sm font-semibold text-rose-700 hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-300 dark:hover:bg-rose-500/25">
               <SignOutIcon className="h-4 w-4" /> Sign out
             </button>
           </form>
@@ -81,7 +81,7 @@ export function AccountMenuView({ name, email, initials, compact = false, demo =
         </span>
       </Link>
       <form action={demo ? undefined : signOut} className="mt-2">
-        <button className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-white text-sm font-semibold text-rose-700 ring-1 ring-inset ring-rose-200 hover:bg-rose-50 dark:bg-zinc-950 dark:text-rose-300 dark:ring-rose-500/30">
+        <button className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-white text-sm font-semibold text-rose-700 ring-1 ring-inset ring-rose-200 hover:bg-rose-50 dark:bg-zinc-950 dark:text-rose-300 dark:ring-rose-500/30 dark:hover:bg-rose-500/20">
           <SignOutIcon className="h-4 w-4" /> Sign out
         </button>
       </form>

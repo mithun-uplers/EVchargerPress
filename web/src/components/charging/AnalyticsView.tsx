@@ -51,7 +51,7 @@ export function AnalyticsView({ a, banner }: { a: Analytics; banner?: ReactNode 
           <h1 className="text-2xl font-semibold tracking-tight">Charging analytics</h1>
           <p className="mt-1 text-sm text-zinc-500">Last 12 months (since {fromLabel}) · recorded sessions only, booking estimates excluded.</p>
         </div>
-        <Link href="/history" className="inline-flex min-h-10 items-center rounded-xl px-3 text-sm font-medium ring-1 ring-inset ring-zinc-300 hover:bg-white dark:ring-zinc-700">Charging history</Link>
+        <Link href="/history" className="inline-flex min-h-10 items-center rounded-xl px-3 text-sm font-medium ring-1 ring-inset ring-zinc-300 hover:bg-white dark:ring-zinc-700 dark:hover:bg-zinc-800">Charging history</Link>
       </div>
 
       <section aria-label="Totals" className="rounded-3xl bg-gradient-to-br from-energy-700 via-energy-600 to-energy-800 p-5 text-white shadow-md sm:p-6">

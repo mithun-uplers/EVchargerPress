@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, it } from "vitest";
-import { asUser, book, createStation, createUser, db, errorCode, expectOk } from "./helpers";
+import { asUser, book, bookWithVehicle, createStation, createUser, createVehicle, db, errorCode, expectOk } from "./helpers";
 
 const NOW = "2027-03-01T03:00:00Z"; // 08:30 IST
 const START = "2027-03-01T06:00:00Z";
@@ -190,5 +190,45 @@ describe("admin role", () => {
     expect(log.map((l) => l.action)).toEqual(["update_profile", "set_password"]);
     expect(log[0].detail).toEqual({ display_name: { from: "Old Name", to: "New Name" }, phone: { from: null, to: "+919876543210" } });
     expect(log[1].detail).toEqual({ require_change: true });
+  });
+
+  it("confirms a user's email so they can sign in", async () => {
+    const admin = await makeAdmin();
+    const driver = await createUser();
+    expect((await db.query("select email_confirmed_at from auth.users where id = $1", [driver])).rows[0].email_confirmed_at).toBeNull();
+    expect(errorCode(await asUser(driver, NOW, "select public.admin_confirm_email($1)", [driver]))).toBe("42501");
+    const r = expectOk(await asUser<{ r: { already_confirmed: boolean } }>(admin, NOW, "select public.admin_confirm_email($1) as r", [driver])).r;
+    expect(r.already_confirmed).toBe(false);
+    expect((await db.query("select email_confirmed_at from auth.users where id = $1", [driver])).rows[0].email_confirmed_at).not.toBeNull();
+    const again = expectOk(await asUser<{ r: { already_confirmed: boolean } }>(admin, NOW, "select public.admin_confirm_email($1) as r", [driver])).r;
+    expect(again.already_confirmed).toBe(true);
+    const log = (await db.query("select action from public.admin_audit where target_id = $1", [driver])).rows;
+    expect(log.map((l) => l.action)).toEqual(["confirm_email"]);
+  });
+
+  it("deletes a user with their vehicles and bookings, but never yourself or an admin", async () => {
+    const admin = await makeAdmin();
+    const driver = await createUser("Leaving Driver");
+    const email = (await db.query("select email from auth.users where id = $1", [driver])).rows[0].email as string;
+    const { evseId } = await createStation();
+    const vehicle = await createVehicle(driver);
+    expectOk(await bookWithVehicle(driver, NOW, evseId, vehicle, START));
+    expectOk(await asUser(driver, NOW, "insert into public.trips (user_id, name, from_label, from_lat, from_lng, to_label, to_lat, to_lng, distance_km, duration_min, route_source, start_soc_percent, reserve_percent, consumption_kwh_per_100km, battery_kwh, feasible, route_geometry) values ($1, 'T', 'A', 1, 1, 'B', 2, 2, 10, 10, 'osrm', 80, 15, 15, 40, true, $2::jsonb) returning id", [driver, JSON.stringify({ type: "LineString", coordinates: [[1, 1], [2, 2]] })]));
+
+    expect(errorCode(await asUser(driver, NOW, "select public.admin_delete_user($1, $2)", [driver, email]))).toBe("42501");
+    expect(errorCode(await asUser(admin, NOW, "select public.admin_delete_user($1, 'wrong@example.com')", [driver]))).toBe("EVB24");
+    const adminEmail = (await db.query("select email from auth.users where id = $1", [admin])).rows[0].email as string;
+    expect(errorCode(await asUser(admin, NOW, "select public.admin_delete_user($1, $2)", [admin, adminEmail]))).toBe("EVB24");
+    const other = await makeAdmin();
+    const otherEmail = (await db.query("select email from auth.users where id = $1", [other])).rows[0].email as string;
+    expect(errorCode(await asUser(admin, NOW, "select public.admin_delete_user($1, $2)", [other, otherEmail]))).toBe("EVB24");
+
+    const r = expectOk(await asUser<{ r: Record<string, unknown> }>(admin, NOW, "select public.admin_delete_user($1, $2, 'Asked by email') as r", [driver, ` ${email.toUpperCase()} `])).r;
+    expect(r).toMatchObject({ bookings_cancelled: 1, bookings_removed: 1 });
+    for (const t of ["auth.users where id", "public.profiles where id", "public.vehicles where user_id", "public.bookings where user_id", "public.trips where user_id"]) {
+      expect((await db.query(`select count(*)::int as n from ${t} = $1`, [driver])).rows[0].n).toBe(0);
+    }
+    const log = (await db.query("select action, detail from public.admin_audit where target_id = $1", [driver])).rows;
+    expect(log).toEqual([{ action: "delete_user", detail: expect.objectContaining({ email, display_name: "Leaving Driver", reason: "Asked by email" }) }]);
   });
 });

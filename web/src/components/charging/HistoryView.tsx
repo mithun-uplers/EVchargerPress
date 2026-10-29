@@ -230,7 +230,7 @@ export function HistoryView({
           <p className="mt-1 text-sm text-zinc-500">Recorded sessions, spending and trends. Estimates are marked “~”.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-        <Link href="/analytics" className="inline-flex min-h-11 items-center rounded-xl bg-white px-4 text-sm font-medium shadow-sm ring-1 ring-inset ring-zinc-200 hover:bg-energy-50 dark:bg-zinc-900 dark:ring-zinc-700">Analytics</Link>
+        <Link href="/analytics" className="inline-flex min-h-11 items-center rounded-xl bg-white px-4 text-sm font-medium shadow-sm ring-1 ring-inset ring-zinc-200 hover:bg-energy-50 dark:bg-zinc-900 dark:ring-zinc-700 dark:hover:bg-energy-500/15">Analytics</Link>
         {addSession && (
           <a href="#add-session" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-energy-600 px-4 text-sm font-medium text-white shadow-sm hover:bg-energy-700">
             <BoltIcon className="h-4 w-4" /> Add session

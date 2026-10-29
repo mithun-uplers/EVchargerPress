@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { setAdminAction, setUserStatusAction } from "@/app/admin/actions";
+import { confirmEmailAction, setAdminAction, setUserStatusAction } from "@/app/admin/actions";
 import { AdminHeader, Flash, Pill } from "@/components/admin/AdminUI";
-import { EditUserForm, SetPasswordForm } from "@/components/admin/UserForms";
+import { DeleteUserForm, EditUserForm, SetPasswordForm } from "@/components/admin/UserForms";
 import { formatLocal } from "@/lib/format";
 import { ui } from "@/lib/ui";
 import type { AdminUserDetail, AuditEntry } from "@/server/admin";
@@ -9,7 +9,7 @@ import type { AdminUserDetail, AuditEntry } from "@/server/admin";
 const when = (v: string | null) => (v ? formatLocal(v, "Asia/Kolkata", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }) : "—");
 const ACTION: Record<string, string> = {
   create_user: "Account created", change_email: "Email changed", set_password: "Password set by admin", update_profile: "Profile edited",
-  grant_admin: "Made admin", revoke_admin: "Admin access removed", suspend_user: "Suspended", reactivate_user: "Reactivated",
+  grant_admin: "Made admin", confirm_email: "Email confirmed by admin", revoke_admin: "Admin access removed", suspend_user: "Suspended", reactivate_user: "Reactivated",
 };
 
 export function UserDetailView({ u, audit, isSelf, canManageAccounts, sp }: {
@@ -27,6 +27,23 @@ export function UserDetailView({ u, audit, isSelf, canManageAccounts, sp }: {
         {isSelf && <Pill>This is you</Pill>}
       </div>
       <Flash sp={sp} />
+      {!u.email_confirmed && (
+        <section aria-labelledby="confirm-h" className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-amber-50 p-4 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/30">
+          <div className="min-w-0 text-sm">
+            <h2 id="confirm-h" className="font-semibold text-amber-900 dark:text-amber-200">Email not confirmed — they can’t sign in yet</h2>
+            <p className="mt-0.5 text-amber-800 dark:text-amber-300">
+              They haven’t opened the confirmation link sent to {u.email}. If you know this person, confirm the email for them to allow sign-in now.
+            </p>
+          </div>
+          <form action={confirmEmailAction}>
+            <input type="hidden" name="user_id" value={u.id} />
+            <input type="hidden" name="back" value={back} />
+            <button className="inline-flex min-h-11 items-center justify-center rounded-xl bg-amber-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700">
+              Confirm email &amp; allow sign-in
+            </button>
+          </form>
+        </section>
+      )}
       {!canManageAccounts && (
         <p className={ui.error}>Email and password changes are off: add <code>SUPABASE_SERVICE_ROLE_KEY</code> to the server environment (see docs/ADMIN.md). Name, phone, admin access and suspension still work.</p>
       )}
@@ -102,6 +119,43 @@ export function UserDetailView({ u, audit, isSelf, canManageAccounts, sp }: {
               <SetPasswordForm userId={u.id} disabled={!canManageAccounts} />
             </section>
           )}
+
+          <section id="delete" aria-labelledby="delete-h" className="scroll-mt-20 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-rose-200 sm:p-5 dark:bg-zinc-900 dark:ring-rose-500/30">
+            <div className="flex items-start gap-3">
+              <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" /></svg>
+              </span>
+              <div className="min-w-0">
+                <h2 id="delete-h" className="font-semibold text-rose-700 dark:text-rose-300">Delete account</h2>
+                <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Permanently removes the sign-in and everything that belongs to it. This can’t be undone.</p>
+              </div>
+            </div>
+            {isSelf ? (
+              <p className="mt-3 text-sm text-zinc-500">You can’t delete your own account from the admin panel.</p>
+            ) : u.is_admin ? (
+              <p className="mt-3 text-sm text-zinc-500">Remove admin access first, then you can delete this account.</p>
+            ) : (
+              <>
+                <ul className="mt-3 grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
+                  {[["Bookings", u.bookings], ["Vehicles", u.vehicles], ["Charging sessions", u.sessions], ["Check-ins", u.checkins], ["Reviews", u.reviews], ["Upcoming bookings", u.bookings_upcoming]].map(([k, v]) => (
+                    <li key={k as string} className="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800/60">
+                      <span className="block text-xs text-zinc-500">{k}</span>
+                      <span className="font-semibold tabular-nums">{v}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-xs text-zinc-500">
+                  Upcoming bookings are cancelled without a fee first. To keep their history, suspend the account instead.
+                </p>
+                <details className="mt-3 rounded-xl ring-1 ring-zinc-200 dark:ring-zinc-800">
+                  <summary className="flex min-h-11 cursor-pointer items-center px-3 text-sm font-semibold text-rose-700 dark:text-rose-300">Continue to delete…</summary>
+                  <div className="border-t border-zinc-100 p-3 dark:border-zinc-800">
+                    <DeleteUserForm userId={u.id} email={u.email} />
+                  </div>
+                </details>
+              </>
+            )}
+          </section>
         </div>
 
         <aside className="space-y-4">

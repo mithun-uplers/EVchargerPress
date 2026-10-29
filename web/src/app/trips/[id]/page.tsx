@@ -48,7 +48,7 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
             <Link href={replan} className={ui.btnLight}>Plan again with today’s battery</Link>
             <form action={deleteTripAction}>
               <input type="hidden" name="id" value={t.id} />
-              <button className="inline-flex min-h-11 items-center rounded-xl px-4 text-sm font-medium text-rose-700 ring-1 ring-inset ring-rose-200 hover:bg-rose-50 dark:text-rose-300 dark:ring-rose-500/30">Delete</button>
+              <button className="inline-flex min-h-11 items-center rounded-xl px-4 text-sm font-medium text-rose-700 ring-1 ring-inset ring-rose-200 hover:bg-rose-50 dark:text-rose-300 dark:ring-rose-500/30 dark:hover:bg-rose-500/20">Delete</button>
             </form>
           </div>
           {sp.saved === "1" && <p role="status" className={`basis-full ${ui.ok}`}>Trip saved with {stations.length} charging station{stations.length === 1 ? "" : "s"} along the route.</p>}

@@ -52,7 +52,7 @@ export default async function ProfilePage() {
         <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-zinc-100 pt-4 text-sm dark:border-zinc-800">
           <Link href="/reset-password" className={ui.btnLight}>Change password</Link>
           <form action={signOut}>
-            <button className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rose-50 px-4 text-sm font-semibold text-rose-700 ring-1 ring-inset ring-rose-200 hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-500/30">
+            <button className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rose-50 px-4 text-sm font-semibold text-rose-700 ring-1 ring-inset ring-rose-200 hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-500/30 dark:hover:bg-rose-500/25">
               <SignOutIcon className="h-4 w-4" /> Sign out
             </button>
           </form>

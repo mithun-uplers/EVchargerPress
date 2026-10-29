@@ -139,7 +139,7 @@ export function VehicleConnectPanel({
             <form action={demo ? undefined : disconnectVehicleAction}>
               <input type="hidden" name="connection_id" value={connection.id} />
               <input type="hidden" name="vehicle_id" value={vehicleId} />
-              <button className="inline-flex min-h-11 items-center rounded-xl px-4 text-sm font-medium text-rose-700 ring-1 ring-inset ring-rose-200 hover:bg-rose-50 dark:text-rose-300 dark:ring-rose-500/30">Disconnect</button>
+              <button className="inline-flex min-h-11 items-center rounded-xl px-4 text-sm font-medium text-rose-700 ring-1 ring-inset ring-rose-200 hover:bg-rose-50 dark:text-rose-300 dark:ring-rose-500/30 dark:hover:bg-rose-500/20">Disconnect</button>
             </form>
           </div>
         </>

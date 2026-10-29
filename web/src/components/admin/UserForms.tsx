@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { createUserAction, setPasswordAction, updateUserAction, type UserFormState } from "@/app/admin/user-actions";
+import { createUserAction, deleteUserAction, setPasswordAction, updateUserAction, type DeleteState, type UserFormState } from "@/app/admin/user-actions";
 import { FormMessage, SubmitButton } from "@/components/forms";
 import { ui } from "@/lib/ui";
 
@@ -142,6 +142,33 @@ export function SetPasswordForm({ userId, disabled }: { userId: string; disabled
       </fieldset>
       <FormMessage state={state} />
       <SubmitButton pending={pending} variant="secondary">Set new password</SubmitButton>
+    </form>
+  );
+}
+
+/** Typed-confirmation delete form: the button stays disabled until the email matches. */
+export function DeleteUserForm({ userId, email }: { userId: string; email: string }) {
+  const [state, action, pending] = useActionState<DeleteState, FormData>(deleteUserAction, null);
+  const [typed, setTyped] = useState("");
+  const matches = typed.trim().toLowerCase() === email.toLowerCase();
+  return (
+    <form action={action} className="space-y-3">
+      <input type="hidden" name="user_id" value={userId} />
+      <label className="block text-sm font-medium">
+        Reason (kept in the audit log)
+        <input name="reason" maxLength={300} placeholder="Asked to close their account" className={ui.input} />
+      </label>
+      <label className="block text-sm font-medium">
+        Type <span className="select-all font-mono text-rose-700 dark:text-rose-300">{email}</span> to confirm
+        <input name="confirm_email" autoComplete="off" spellCheck={false} value={typed} onChange={(e) => setTyped(e.target.value)} className={ui.input} />
+      </label>
+      <FormMessage state={state} />
+      <button
+        disabled={!matches || pending}
+        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-rose-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {pending ? "Deleting…" : "Delete account permanently"}
+      </button>
     </form>
   );
 }

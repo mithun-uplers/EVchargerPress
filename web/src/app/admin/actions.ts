@@ -357,3 +357,10 @@ export async function registerChargePointAction(_prev: RegisterState, f: FormDat
     return { error: messageOf(e) };
   }
 }
+
+export async function confirmEmailAction(f: FormData) {
+  await requireAdmin();
+  await act(safeBack(f, "/admin/users"), "Email confirmed. They can sign in now.", async () => {
+    await rpc("admin_confirm_email", { p_user_id: str(f, "user_id") });
+  });
+}

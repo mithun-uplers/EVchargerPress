@@ -39,7 +39,7 @@ export function RemoveVehicleButton({ vehicleId }: { vehicleId: string }) {
       className="space-y-2"
     >
       <input type="hidden" name="id" value={vehicleId} />
-      <button disabled={pending} className="min-h-10 rounded-lg px-3 text-sm font-medium text-rose-700 ring-1 ring-inset ring-rose-200 hover:bg-rose-50 disabled:opacity-60 dark:text-rose-300 dark:ring-rose-500/30">
+      <button disabled={pending} className="min-h-10 rounded-lg px-3 text-sm font-medium text-rose-700 ring-1 ring-inset ring-rose-200 hover:bg-rose-50 disabled:opacity-60 dark:text-rose-300 dark:ring-rose-500/30 dark:hover:bg-rose-500/20">
         {pending ? "Removing…" : "Remove vehicle"}
       </button>
       <FormMessage state={state} />

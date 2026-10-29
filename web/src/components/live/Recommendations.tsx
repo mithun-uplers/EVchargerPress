@@ -14,7 +14,7 @@ export function Recommendations({ items, vehicleLabel, located }: { items: Recom
             {located ? " · near you" : " · use Near me to include distance"}
           </p>
         </div>
-        <Link href="/route" className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-3 text-sm font-medium shadow-sm ring-1 ring-inset ring-zinc-200 hover:bg-energy-50 dark:bg-zinc-900 dark:ring-zinc-700">
+        <Link href="/route" className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-3 text-sm font-medium shadow-sm ring-1 ring-inset ring-zinc-200 hover:bg-energy-50 dark:bg-zinc-900 dark:ring-zinc-700 dark:hover:bg-energy-500/15">
           <RouteIcon className="h-4 w-4 text-energy-600" /> Plan a trip
         </Link>
       </div>

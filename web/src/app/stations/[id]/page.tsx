@@ -130,7 +130,7 @@ export default async function StationPage({ params, searchParams }: PageProps<"/
                   ? "This station comes from OpenStreetMap. We don’t have verified charging points, opening hours or prices for it, so we don’t take bookings — turn up and charge as usual."
                   : "The operator hasn’t published bookable charging points, opening hours and prices for this station yet."}
               </p>
-              <Link href="/?bookable=1" className="mt-3 inline-flex min-h-11 items-center rounded-lg px-4 text-sm font-medium text-energy-700 ring-1 ring-inset ring-energy-200 hover:bg-energy-50 dark:text-energy-400 dark:ring-energy-500/30">
+              <Link href="/?bookable=1" className="mt-3 inline-flex min-h-11 items-center rounded-lg px-4 text-sm font-medium text-energy-700 ring-1 ring-inset ring-energy-200 hover:bg-energy-50 dark:text-energy-400 dark:ring-energy-500/30 dark:hover:bg-energy-500/15">
                 Find bookable stations
               </Link>
             </section>

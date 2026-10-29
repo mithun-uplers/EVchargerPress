@@ -129,3 +129,20 @@ export async function setPasswordAction(_prev: UserFormState, f: FormData): Prom
   revalidatePath(`/admin/users/${id}`);
   return { ok: `New password set. Share it privately${requireChange ? "; they’ll choose their own at next sign-in" : ""}.` };
 }
+
+export type DeleteState = { error?: string } | null;
+
+/** Permanently deletes an account (Postgres checks: admin only, not yourself, not another admin, email typed to confirm). */
+export async function deleteUserAction(_prev: DeleteState, f: FormData): Promise<DeleteState> {
+  const id = str(f, "user_id");
+  await requireAdmin(`/admin/users/${id}`);
+  let email = "";
+  try {
+    const r = await rpc<{ email: string }>("admin_delete_user", { p_user_id: id, p_confirm_email: str(f, "confirm_email"), p_reason: str(f, "reason") || null });
+    email = r.email;
+  } catch (e) {
+    return { error: messageOf(e) };
+  }
+  revalidatePath("/admin/users");
+  redirect(`/admin/users?${new URLSearchParams({ ok: `Account ${email} and its data were deleted.` })}`);
+}

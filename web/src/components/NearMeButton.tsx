@@ -50,7 +50,7 @@ export function NearMeButton() {
         className={`inline-flex min-h-10 items-center rounded-xl px-3 text-sm font-medium shadow-sm ring-1 ring-inset transition ${
           active
             ? "bg-energy-600 text-white ring-energy-600"
-            : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-200 dark:ring-zinc-700"
+            : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-200 dark:ring-zinc-700 dark:hover:bg-zinc-800"
         }`}
       >
         {busy ? "Locating…" : active ? "Nearest first ✕" : "Near me"}

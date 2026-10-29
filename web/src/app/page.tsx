@@ -126,7 +126,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
               : `Showing ${stations.length} of ${count ?? stations.length} stations${count && count > stations.length ? " — search or use Near me to narrow down" : ""}`}
         </p>
         <div className="flex items-start gap-2">
-          <Link href={mapHref} className="inline-flex min-h-10 items-center rounded-xl bg-white px-3 text-sm font-medium text-zinc-700 shadow-sm ring-1 ring-inset ring-zinc-200 hover:bg-energy-50 dark:bg-zinc-900 dark:text-zinc-200 dark:ring-zinc-700">
+          <Link href={mapHref} className="inline-flex min-h-10 items-center rounded-xl bg-white px-3 text-sm font-medium text-zinc-700 shadow-sm ring-1 ring-inset ring-zinc-200 hover:bg-energy-50 dark:bg-zinc-900 dark:text-zinc-200 dark:ring-zinc-700 dark:hover:bg-energy-500/15">
             Map view
           </Link>
           <Suspense>

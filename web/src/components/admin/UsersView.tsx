@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { setAdminAction, setUserStatusAction } from "@/app/admin/actions";
+import { confirmEmailAction, setAdminAction, setUserStatusAction } from "@/app/admin/actions";
 import { AdminHeader, Empty, Flash, Pager, Pill, TableCard, td, th } from "@/components/admin/AdminUI";
 import { formatLocal } from "@/lib/format";
 import { ui } from "@/lib/ui";
@@ -44,7 +44,7 @@ export function UsersView({ rows, q, page, size, meId, sp }: { rows: AdminUser[]
                 <tr key={u.id}>
                   <td className={`${td} min-w-[13rem]`}>
                     <Link href={`/admin/users/${u.id}`} className="font-medium hover:underline">{u.display_name || "—"}</Link>{self && <span className="text-zinc-500"> (you)</span>}
-                    <span className="block break-all text-xs text-zinc-500">{u.email}{!u.email_confirmed && " · email not confirmed"}</span>
+                    <span className="block break-all text-xs text-zinc-500">{u.email}</span>
                   </td>
                   <td className={`${td} whitespace-nowrap text-xs`}>
                     {date(u.created_at)}
@@ -53,11 +53,22 @@ export function UsersView({ rows, q, page, size, meId, sp }: { rows: AdminUser[]
                   <td className={`${td} whitespace-nowrap text-xs`}>{u.bookings} bookings · {u.vehicles} vehicles · {u.sessions} sessions</td>
                   <td className={`${td} space-x-1 space-y-1`}>
                     {u.is_admin && <Pill tone="blue">Admin</Pill>}
+                    {!u.email_confirmed && <Pill tone="amber">Email not confirmed</Pill>}
                     {u.status === "active" ? <Pill tone="green">Active</Pill> : u.status === "suspended" ? <Pill tone="red">Suspended</Pill> : <Pill tone="amber">Deletion requested</Pill>}
                   </td>
                   <td className={`${td} text-right`}>
                     <div className="flex flex-wrap justify-end gap-x-3">
+                      {!u.email_confirmed && (
+                        <form action={confirmEmailAction}>
+                          <input type="hidden" name="user_id" value={u.id} />
+                          <input type="hidden" name="back" value={back} />
+                          <button className="min-h-10 text-sm font-semibold text-amber-700 hover:underline dark:text-amber-300">Allow sign-in</button>
+                        </form>
+                      )}
                       <Link href={`/admin/users/${u.id}`} className="inline-flex min-h-10 items-center text-sm font-medium text-zinc-700 hover:underline dark:text-zinc-200">Edit</Link>
+                      {!self && !u.is_admin && (
+                        <Link href={`/admin/users/${u.id}#delete`} className="inline-flex min-h-10 items-center text-sm font-medium text-rose-600 hover:underline dark:text-rose-400">Delete…</Link>
+                      )}
                       {u.status === "active" && (
                         <form action={setAdminAction}>
                           <input type="hidden" name="user_id" value={u.id} />
