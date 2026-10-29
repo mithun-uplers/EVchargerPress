@@ -55,7 +55,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         )}
         <button className={`${ui.btn} w-full`}>{signup ? "Create account" : "Sign in"}</button>
       </form>
-      {signup && <p className="mt-4 text-xs text-zinc-500">We’ll email you a link to confirm your address before you can sign in.</p>}
+      {signup && <p className="mt-4 text-xs text-zinc-500">You’re signed in straight away after creating your account.</p>}
     </AuthShell>
   );
 }
