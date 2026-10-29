@@ -1,3 +1,4 @@
+import { connectLabels } from "@/lib/vehicle-types";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -39,11 +40,12 @@ export default async function VehiclePage({ params, searchParams }: PageProps<"/
   const [readings, sessions, finished, upcomingRows, carTelemetry] = await Promise.all([
     listBatteryReadings(id), listSessions(500), listFinishedBookings(200), listBookings("upcoming"), connection ? telemetry(id) : Promise.resolve([]),
   ]);
+  const L = connectLabels(vehicle.vehicle_type);
   const one = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string).slice(0, 200) : "");
   const notice: ConnectNotice = one("connect_error") ? { kind: "error", text: one("connect_error") }
-    : one("connected") === "smartcar" ? { kind: "ok", text: "Your car is connected through Smartcar." }
-    : one("connected") === "simulator" ? { kind: "ok", text: "Simulated car connected. It reports a reading every 5 minutes." }
-    : one("synced") ? { kind: "ok", text: "Synced with your car." }
+    : one("connected") === "smartcar" ? { kind: "ok", text: `Your ${L.noun} is connected through Smartcar.` }
+    : one("connected") === "simulator" ? { kind: "ok", text: `${L.simulated} connected. It reports a reading every 5 minutes.` }
+    : one("synced") ? { kind: "ok", text: `Synced with your ${L.noun}.` }
     : one("disconnected") ? { kind: "ok", text: "Disconnected. Readings already saved stay in your history." }
     : autoSyncError ? { kind: "error", text: autoSyncError } : null;
   const all = toHistoryItems(sessions, finished);
@@ -77,7 +79,7 @@ export default async function VehiclePage({ params, searchParams }: PageProps<"/
           )}
           <Link href="#connect" className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-charge-400 px-3 text-sm font-semibold text-zinc-900 hover:bg-charge-300">
             <PlugIcon className="h-4 w-4" />
-            {connection && connection.status !== "pending" ? (connection.provider === "simulator" || connection.mode === "simulated" ? "Simulated car" : "Car connected") : "Connect car"}
+            {connection && connection.status !== "pending" ? (connection.provider === "simulator" || connection.mode === "simulated" ? L.simulated : L.connected) : L.connect}
           </Link>
           {!editing && (
             <Link href={`/vehicles/${vehicle.id}?edit=1#edit`} className="inline-flex min-h-9 items-center rounded-full bg-white px-3 text-sm font-medium text-energy-800 hover:bg-energy-50">Edit</Link>
@@ -94,7 +96,7 @@ export default async function VehiclePage({ params, searchParams }: PageProps<"/
       }
       readingForm={<BatteryReadingForm vehicleId={vehicle.id} />}
       connectSlot={
-        <VehicleConnectPanel vehicleId={vehicle.id} connection={connection} telemetry={carTelemetry} smartcarAvailable={smartcarConfigured()}
+        <VehicleConnectPanel vehicleId={vehicle.id} vehicleType={vehicle.vehicle_type} connection={connection} telemetry={carTelemetry} smartcarAvailable={smartcarConfigured()}
           smartcarTestMode={smartcarMode() === "simulated"} notice={notice} now={nowMs} />
       }
       removeSlot={<RemoveVehicleButton vehicleId={vehicle.id} />}

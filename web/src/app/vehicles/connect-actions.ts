@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase/server";
+import { supportsCloudConnect, vehicleNoun } from "@/lib/vehicle-types";
+import { getVehicle } from "@/server/account";
 import { BookingError } from "@/server/bookings";
 import { connectUrl, smartcarConfigured } from "@/server/smartcar";
 import { disconnect, startConnection, syncSmartcar } from "@/server/vehicle-connect";
@@ -20,6 +22,12 @@ export async function connectVehicleAction(formData: FormData) {
   if (!UUID.test(vehicleId)) redirect("/vehicles");
   const provider = str(formData.get("provider")) === "smartcar" ? "smartcar" : "simulator";
   if (provider === "smartcar" && !smartcarConfigured()) redirect(back(vehicleId, { connect_error: "Smartcar isn’t set up on this server yet." }));
+  if (provider === "smartcar") {
+    const vehicle = await getVehicle(vehicleId);
+    if (!vehicle) redirect("/vehicles");
+    if (!supportsCloudConnect(vehicle.vehicle_type))
+      redirect(back(vehicleId, { connect_error: `Smartcar connects cars only, so it isn’t available for this ${vehicleNoun(vehicle.vehicle_type)}.` }));
+  }
   let state: string | null = null;
   try {
     ({ state_nonce: state } = await startConnection(vehicleId, provider));

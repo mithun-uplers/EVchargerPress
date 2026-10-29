@@ -1,3 +1,4 @@
+import { connectLabels } from "@/lib/vehicle-types";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -23,7 +24,7 @@ export default async function VehiclesPage({ searchParams }: PageProps<"/vehicle
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">My vehicles</h1>
-          <p className="mt-1 text-sm text-zinc-500">Connector types decide which chargers you can book. Tap <strong>Connect car</strong> to read battery, range and location from the car itself.</p>
+          <p className="mt-1 text-sm text-zinc-500">Connector types decide which chargers you can book. Tap <strong>Connect</strong> on a vehicle to read battery, range and location from the vehicle itself.</p>
         </div>
         <Link href="/vehicles/new" className="inline-flex min-h-11 items-center rounded-xl bg-energy-600 px-4 text-sm font-medium text-white shadow-sm hover:bg-energy-700">
           Add vehicle
@@ -57,7 +58,7 @@ export default async function VehiclesPage({ searchParams }: PageProps<"/vehicle
                     )}
                     {!(connections[v.id] && connections[v.id].status !== "pending") && (
                       <Link href={`/vehicles/${v.id}#connect`} className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-charge-400 px-3 text-sm font-semibold text-zinc-900 hover:bg-charge-300">
-                        <PlugIcon className="h-4 w-4" /> Connect car
+                        <PlugIcon className="h-4 w-4" /> {connectLabels(v.vehicle_type).connect}
                       </Link>
                     )}
                   </span>

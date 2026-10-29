@@ -3,12 +3,13 @@ import { LineChart } from "@/components/charging/VehicleVisuals";
 import { PlugIcon } from "@/components/nav/icons";
 import { secondsAgo } from "@/lib/live";
 import { ui } from "@/lib/ui";
+import { connectLabels, supportsCloudConnect } from "@/lib/vehicle-types";
 import type { Telemetry, VehicleConnection } from "@/server/vehicle-connect";
 
 export type ConnectNotice = { kind: "ok" | "error"; text: string } | null;
 
-function sourceLabel(c: VehicleConnection) {
-  if (c.provider === "simulator") return "Simulated car";
+function sourceLabel(c: VehicleConnection, simulatedLabel: string) {
+  if (c.provider === "simulator") return simulatedLabel;
   return c.mode === "simulated" ? "Smartcar · test vehicle" : "Smartcar · live";
 }
 
@@ -22,11 +23,12 @@ function Stat({ label, value, note }: { label: string; value: string; note?: str
   );
 }
 
-/** "Connected car": connect via Smartcar or a simulated car, then show what the car reports — always labelled. */
+/** "Connected car/scooter/…": connect via Smartcar (cars) or the simulator, then show what the vehicle reports — always labelled. */
 export function VehicleConnectPanel({
-  vehicleId, connection, telemetry, smartcarAvailable, smartcarTestMode, notice, now, demo = false,
+  vehicleId, vehicleType, connection, telemetry, smartcarAvailable, smartcarTestMode, notice, now, demo = false,
 }: {
   vehicleId: string;
+  vehicleType: string;
   connection: VehicleConnection | null;
   telemetry: Telemetry[];
   smartcarAvailable: boolean;
@@ -35,6 +37,8 @@ export function VehicleConnectPanel({
   now: number;
   demo?: boolean;
 }) {
+  const L = connectLabels(vehicleType);
+  const cloudOk = supportsCloudConnect(vehicleType);
   const latest = telemetry[0] ?? null;
   const simulated = connection ? connection.provider === "simulator" || connection.mode === "simulated" : false;
   const soc24 = telemetry.filter((t) => t.soc_percent !== null && now - Date.parse(t.recorded_at) <= 24 * 3600_000).map((t) => ({ t: t.recorded_at, v: Number(t.soc_percent) }));
@@ -45,11 +49,11 @@ export function VehicleConnectPanel({
         <div className="flex items-center gap-3">
           <span aria-hidden="true" className="grid h-10 w-10 place-items-center rounded-xl bg-energy-50 text-energy-700 dark:bg-energy-500/10 dark:text-energy-300"><PlugIcon className="h-5 w-5" /></span>
           <div>
-            <h2 id="connect-h" className="font-semibold">Connected car</h2>
+            <h2 id="connect-h" className="font-semibold">{L.heading}</h2>
             <p className="text-sm text-zinc-500">
               {connection?.status === "active" || connection?.status === "error"
-                ? `${sourceLabel(connection)}${connection.provider_make ? ` · ${connection.provider_make} ${connection.provider_model ?? ""}${connection.provider_year ? ` ${connection.provider_year}` : ""}` : ""}`
-                : "Read battery, range, odometer, charging and location straight from your car."}
+                ? `${sourceLabel(connection, L.simulated)}${connection.provider_make ? ` · ${connection.provider_make} ${connection.provider_model ?? ""}${connection.provider_year ? ` ${connection.provider_year}` : ""}` : ""}`
+                : `Read battery, range, odometer, charging and location straight from your ${L.noun}.`}
             </p>
           </div>
         </div>
@@ -69,25 +73,37 @@ export function VehicleConnectPanel({
             <input type="hidden" name="provider" value="smartcar" />
             <p className="font-semibold">Connect with Smartcar</p>
             <p className="mt-1 flex-1 text-sm text-zinc-500">
-              Sign in with your car brand’s account (Tesla, BMW, Hyundai, Kia, Ford, VW and more). You choose what to share and can disconnect any time.
-              {smartcarTestMode ? " This server uses Smartcar test mode: you’ll connect a virtual car." : ""}
+              {cloudOk ? (
+                <>
+                  Sign in with your car brand’s account (Tesla, BMW, Hyundai, Kia, Ford, VW and more). You choose what to share and can disconnect any time.
+                  {smartcarTestMode ? " This server uses Smartcar test mode: you’ll connect a virtual car." : ""}
+                </>
+              ) : (
+                <>Smartcar connects cars only. Two-wheeler and e-bike makers don’t offer a public data connection that apps can use yet, so this isn’t available for your {L.noun}.</>
+              )}
             </p>
-            <button disabled={!smartcarAvailable} className={`mt-3 ${ui.btn}`}>{smartcarAvailable ? "Connect car" : "Not set up yet"}</button>
-            {!smartcarAvailable && <p className="mt-2 text-xs text-zinc-500">An admin needs to add the Smartcar keys to the server (see docs/VEHICLE_CONNECT.md).</p>}
+            <button disabled={!smartcarAvailable || !cloudOk} className={`mt-3 ${ui.btn} disabled:cursor-not-allowed`}>
+              {!cloudOk ? "Not available for this vehicle" : smartcarAvailable ? L.connect : "Not set up yet"}
+            </button>
+            {cloudOk && !smartcarAvailable && <p className="mt-2 text-xs text-zinc-500">An admin needs to add the Smartcar keys to the server (see docs/VEHICLE_CONNECT.md).</p>}
             {connection?.status === "pending" && <p className="mt-2 text-xs text-charge-600">A connection was started but not finished — try again.</p>}
           </form>
           <form action={demo ? undefined : connectVehicleAction} className="flex flex-col rounded-2xl p-4 ring-1 ring-inset ring-zinc-200 dark:ring-zinc-700">
             <input type="hidden" name="vehicle_id" value={vehicleId} />
             <input type="hidden" name="provider" value="simulator" />
-            <p className="font-semibold">Use a simulated car</p>
+            <p className="font-semibold">{L.useSimulated}</p>
             <p className="mt-1 flex-1 text-sm text-zinc-500">
-              For testing: a virtual car reports battery %, range, odometer and location every 5 minutes, and follows live charging sessions. Everything is labelled “Simulated”.
+              For testing: a virtual {L.noun} reports battery %, range, odometer and location every 5 minutes, and follows live charging sessions. Everything is labelled “Simulated”.
             </p>
-            <button className={`mt-3 ${ui.btnLight}`}>Connect simulated car</button>
+            <button className={`mt-3 ${ui.btnLight}`}>{L.connectSimulated}</button>
           </form>
-          <p className="text-xs text-zinc-500 sm:col-span-2">
-            Indian brands such as Tata, MG and Mahindra don’t offer a public car API yet. Until they do, keep adding battery readings manually or use charger data from live sessions.
-          </p>
+          <div className="rounded-xl bg-zinc-50 p-3 text-xs text-zinc-600 sm:col-span-2 dark:bg-zinc-800/60 dark:text-zinc-300">
+            <p className="font-semibold text-zinc-800 dark:text-zinc-100">How the connection works</p>
+            <p className="mt-1">
+              Over the internet, not Bluetooth: Smartcar reads your car’s data from the car maker’s cloud after you sign in with your brand account, so it works even when you’re away from the vehicle.
+              Many Indian brands (for example Tata, MG and Mahindra) and two-wheeler makers don’t offer a public data API yet — until they do, add battery readings manually or use the battery % a connected charger reports during live sessions.
+            </p>
+          </div>
         </div>
       ) : (
         <>
@@ -95,7 +111,7 @@ export function VehicleConnectPanel({
             <>
               <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
                 <Stat label="Battery" value={latest.soc_percent !== null ? `${Math.round(Number(latest.soc_percent))}%` : "—"} />
-                <Stat label="Range" value={latest.range_km !== null ? `${Math.round(Number(latest.range_km))} km` : "—"} note="as reported by the car" />
+                <Stat label="Range" value={latest.range_km !== null ? `${Math.round(Number(latest.range_km))} km` : "—"} note={`as reported by the ${L.noun}`} />
                 <Stat label="Odometer" value={latest.odometer_km !== null ? `${Number(latest.odometer_km).toLocaleString("en-IN")} km` : "—"} />
                 <Stat
                   label="Charging"
@@ -115,7 +131,7 @@ export function VehicleConnectPanel({
                 </div>
               </dl>
               <p className="mt-2 text-xs text-zinc-500">
-                {simulated ? "Simulated data for testing — not your real car." : "Reported by your car through Smartcar."} Updated {secondsAgo(latest.recorded_at, now)}.
+                {simulated ? `Simulated data for testing — not your real ${L.noun}.` : `Reported by your ${L.noun} through Smartcar.`} Updated {secondsAgo(latest.recorded_at, now)}.
                 {connection.last_error ? ` Last sync problem: ${connection.last_error}` : ""}
               </p>
               {soc24.length > 1 && (
@@ -126,7 +142,7 @@ export function VehicleConnectPanel({
               )}
             </>
           ) : (
-            <p className="mt-4 text-sm text-zinc-500">Connected — waiting for the first reading from the car.</p>
+            <p className="mt-4 text-sm text-zinc-500">Connected — waiting for the first reading from the {L.noun}.</p>
           )}
           <div className="mt-4 flex flex-wrap gap-2">
             {connection.provider === "smartcar" && (

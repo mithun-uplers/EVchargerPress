@@ -1,3 +1,4 @@
+import { connectLabels } from "@/lib/vehicle-types";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -127,8 +128,8 @@ export default async function PreviewPage({ params, searchParams }: PageProps<"/
     return (
       <div className="mx-auto max-w-3xl space-y-5">
         <Banner />
-        <VehicleConnectPanel vehicleId="v" connection={previewConnection} telemetry={previewTelemetry} smartcarAvailable smartcarTestMode notice={{ kind: "ok", text: "Simulated car connected. It reports a reading every 5 minutes." }} now={PREVIEW_NOW.getTime()} demo />
-        <VehicleConnectPanel vehicleId="v" connection={null} telemetry={[]} smartcarAvailable={false} smartcarTestMode notice={null} now={PREVIEW_NOW.getTime()} demo />
+        <VehicleConnectPanel vehicleId="v" vehicleType="car" connection={previewConnection} telemetry={previewTelemetry} smartcarAvailable smartcarTestMode notice={{ kind: "ok", text: "Simulated car connected. It reports a reading every 5 minutes." }} now={PREVIEW_NOW.getTime()} demo />
+        <VehicleConnectPanel vehicleId="v" vehicleType="scooter" connection={null} telemetry={[]} smartcarAvailable={false} smartcarTestMode notice={null} now={PREVIEW_NOW.getTime()} demo />
       </div>
     );
   }
@@ -277,7 +278,7 @@ export default async function PreviewPage({ params, searchParams }: PageProps<"/
           now={PREVIEW_NOW}
           preferredSlot={<><span className="rounded-full bg-white/20 px-2.5 py-1 text-xs font-medium ring-1 ring-inset ring-white/30">Preferred</span>
             <span className="inline-flex min-h-9 items-center rounded-full bg-charge-400 px-3 text-sm font-semibold text-zinc-900">Connect car</span></>}
-          connectSlot={<VehicleConnectPanel vehicleId={v.id} connection={null} telemetry={[]} smartcarAvailable={false} smartcarTestMode notice={null} now={PREVIEW_NOW.getTime()} demo />}
+          connectSlot={<VehicleConnectPanel vehicleId={v.id} vehicleType={v.vehicle_type} connection={null} telemetry={[]} smartcarAvailable={false} smartcarTestMode notice={null} now={PREVIEW_NOW.getTime()} demo />}
           readingForm={<BatteryReadingForm vehicleId={v.id} />}
         />
       </div>
@@ -289,13 +290,13 @@ export default async function PreviewPage({ params, searchParams }: PageProps<"/
       <Banner />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">My vehicles</h1>
-        <p className="mt-1 text-sm text-zinc-500">Connector types decide which chargers you can book. Tap <strong>Connect car</strong> to read battery, range and location from the car itself.</p>
+        <p className="mt-1 text-sm text-zinc-500">Connector types decide which chargers you can book. Tap <strong>Connect</strong> on a vehicle to read battery, range and location from the vehicle itself.</p>
       </div>
       <ul className="grid gap-4 sm:grid-cols-2">
         {previewVehicles.map((v, i) => (
           <VehicleCard key={v.id} vehicle={v} latest={previewLatest[v.id]} preferred={i === 0}
             action={<span className="flex flex-wrap items-center gap-1">{i ? <span className="px-3 text-sm font-medium text-energy-700">Make preferred</span> : null}
-              <Link href="/preview/connect" className="inline-flex min-h-9 items-center rounded-lg bg-charge-400 px-3 text-sm font-semibold text-zinc-900">Connect car</Link></span>} />
+              <Link href="/preview/connect" className="inline-flex min-h-9 items-center rounded-lg bg-charge-400 px-3 text-sm font-semibold text-zinc-900">{connectLabels(v.vehicle_type).connect}</Link></span>} />
         ))}
       </ul>
     </div>

@@ -65,3 +65,18 @@ within 5 km of the route** (`trip_stations`), with planned stops flagged and sta
 snapshotted. `/trips` lists saved trips; `/trips/{id}` shows the route, stops, battery chart, map and
 all stations (filters: all, fits my car, planned stops) with today's live availability, plus
 "Plan again with today's battery" and Delete.
+
+## Which connection is used — and why not Bluetooth
+
+| Method | Used? | How it works | Limits |
+| --- | --- | --- | --- |
+| **Smartcar (cloud API)** | Yes, for cars | The driver signs in with their car brand's account; Smartcar reads battery, range, odometer, charging and location from the maker's cloud over HTTPS. | Cars from supported brands only. Works anywhere — no need to be near the car. |
+| **Simulator** | Yes, for testing | A virtual car/scooter in the database reports every 5 minutes and follows live charging. | Always labelled *Simulated*. |
+| **Charger data (OCPP)** | Yes, during sessions | Connected chargers can report the battery % while charging. | Only while plugged in at a connected charger. |
+| **Manual readings** | Yes | The driver types battery % / odometer from the dashboard. | As accurate as the entry. |
+| **Bluetooth** | No | Would need a Bluetooth OBD-II dongle (cars) or the maker's private Bluetooth protocol (Ather, Ola, etc.). | Web Bluetooth works only in Chrome/Edge on Android and desktop, not on iPhone. EV battery data over OBD-II uses brand-specific codes, and two-wheeler protocols are private, so results would be unreliable. A native mobile app would be needed for a dependable Bluetooth link. |
+
+Two-wheelers and e-bikes: no public data API exists yet, so the Smartcar option is disabled for them
+(server-side check in `app/vehicles/connect-actions.ts`); the simulator, manual readings and charger
+data still work. Labels follow the vehicle type ("Connect scooter", "Simulated motorcycle") via
+`connectLabels()` in `src/lib/vehicle-types.ts`.

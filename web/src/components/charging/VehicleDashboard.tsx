@@ -5,7 +5,7 @@ import {
   chargeEstimate, efficiencyKwhPer100Km, formatDuration, monthlyTrend, type HistoryItem,
 } from "@/lib/charging-stats";
 import { formatLocal, formatMoney } from "@/lib/format";
-import { VEHICLE_TYPE_LABEL } from "@/lib/vehicle-types";
+import { VEHICLE_TYPE_LABEL, connectLabels } from "@/lib/vehicle-types";
 import type { BatteryReading, Vehicle } from "@/server/account";
 import { BarChart } from "./BarChart";
 import { SessionCard, UpcomingBookings, type BookingBrief } from "./HistoryView";
@@ -63,7 +63,7 @@ export function VehicleDashboard({
   const latestSoc = chargerSoc ? { soc_percent: chargerSoc.soc_percent, recorded_at: chargerSoc.recorded_at } : manualSoc;
   const socLabel = chargerSoc
     ? (chargerSoc.simulated ? "Simulated charger" : "From charger")
-    : manualSoc?.source === "vehicle_api" ? (manualSoc.is_simulated ? "Simulated car" : "From car") : "Manual";
+    : manualSoc?.source === "vehicle_api" ? (manualSoc.is_simulated ? connectLabels(vehicle.vehicle_type).simulated : connectLabels(vehicle.vehicle_type).fromVehicle) : "Manual";
   const latestOdo = readings.find((r) => r.odometer_km !== null) ?? null;
   const battery = vehicle.battery_capacity_kwh !== null ? Number(vehicle.battery_capacity_kwh) : null;
   const powerKw = vehicle.max_dc_kw ? Number(vehicle.max_dc_kw) : vehicle.max_ac_kw ? Number(vehicle.max_ac_kw) : null;
@@ -187,7 +187,7 @@ export function VehicleDashboard({
                 />
               </div>
             </div>
-            <p className="mt-2 text-xs text-zinc-500">From your entries and, if connected, your car — each row shows its source. We don’t calculate battery health from percentage alone.</p>
+            <p className="mt-2 text-xs text-zinc-500">From your entries and, if connected, your {connectLabels(vehicle.vehicle_type).noun} — each row shows its source. We don’t calculate battery health from percentage alone.</p>
             {readingForm && <div className="mt-4 border-t border-zinc-100 pt-4 dark:border-zinc-800">{readingForm}</div>}
             {readings.length > 0 && (
               <details className="mt-4 text-sm">
@@ -203,7 +203,7 @@ export function VehicleDashboard({
                         <td className="py-1.5">{formatLocal(r.recorded_at, timeZone)}</td>
                         <td className="py-1.5 tabular-nums">{r.soc_percent !== null ? `${Number(r.soc_percent)}%` : "—"}</td>
                         <td className="py-1.5 tabular-nums">{r.odometer_km !== null ? `${Number(r.odometer_km).toLocaleString("en-IN")} km` : "—"}</td>
-                        <td className="py-1.5 text-zinc-500">{r.source === "manual" ? "Manual" : r.is_simulated ? "Simulated car" : "From car"}</td>
+                        <td className="py-1.5 text-zinc-500">{r.source === "manual" ? "Manual" : r.is_simulated ? connectLabels(vehicle.vehicle_type).simulated : connectLabels(vehicle.vehicle_type).fromVehicle}</td>
                       </tr>
                     ))}
                   </tbody>
